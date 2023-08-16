@@ -1,0 +1,5423 @@
+<!doctype html>
+<html class="no-js" lang="">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title></title>
+    <link rel="stylesheet" href="../js/easyUI/icon.css">
+    <link rel="stylesheet" href="../js/easyUI/easyui.css">
+    <link rel="stylesheet" href="../js/easyUI/demo.css">
+    <link rel="stylesheet" href="../js/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/common_mdsd.css">
+    <link rel="stylesheet" href="../css/font.css">
+    <script src="../js/bootstrap-3.3.7-dist/js/jquery1.9.1.js"></script>
+    <script src="../js/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+    <script src="../js/easyUI/jquery.easyui.min.js"></script>
+    <script src="../js/echarts1.js"></script>
+    <script src="../js/index_tab_yl.js"></script>
+    <script src="../js/data.js"></script>
+    <style>
+        .child_menu {
+            width: 32.4%;
+            height: 220px;
+            margin-bottom: 10px;
+            border-color: #ddd
+        }
+
+        pre {
+            height: 500px;
+            display: none;
+            color: black;
+            font-size: 16px;
+            background: white
+        }
+
+        pre.on {
+            display: block
+        }
+
+        .child_menu:hover {
+            opacity: 0.6;
+        }
+
+        .preRemove {
+            position: relative;
+            top: 28px;
+            right: -97%;
+            color: #b02f25;
+            font-size: 17px;
+            display: none;
+            width: 0;
+        }
+
+        .preRemove:hover {
+            color: red;
+        }
+    </style>
+
+</head>
+
+<body id="contain" class="container-fluid bodyStyle">
+<div style="padding-top: 20px;padding-left: 30px;">
+    <div class="title_grad">
+        <div></div>
+        <p>柱状图</p>
+    </div>
+    <div style="width: 100%;">
+        <div class="child_menu">
+            <!-- 柱形图-->
+            <div id="C1-1" style="width:100%;height:220px;"></div>
+        </div>
+        <div class="child_menu">
+            <!-- 堆叠柱形图-->
+            <div id="C1-2" style="width:100%;height:220px;"></div>
+        </div>
+        <div class="child_menu maR0">
+            <!-- 折线、柱状混合-双轴-->
+            <div id="C1-3" style="width:100%;height:220px;"></div>
+        </div>
+    </div>
+    <div><span class="glyphicon glyphicon-remove preRemove"></span>
+        <pre class="C1-1">
+    // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+    //C1-1 柱形图
+    window.onload=initBarCharts1();
+    function initBarCharts1(){
+        var itemCategoryUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/CHJB.cda&dataAccessId=bar_ds4";
+        // itemCategoryUrl += "&amp;parambutton_event=" + button_event + "&amp;aramoutletParam=" + outletParam;
+        var data = BarDataEncapsulation1(readJSONFile(itemCategoryUrl).resultset);
+        chartDrew(GetOutletOption1(data.xAxis,data.series),  // option
+            echarts.init(document.getElementById("C1-1")) //chart
+        );
+    }
+    // 封装数据
+    function BarDataEncapsulation1 (cdaData){
+        // 柱状图的X轴属性
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        selected : true
+                    });
+                    tempArr[i] = cdaData[i][0];
+                }
+                return tempArr;
+            })()
+        //柱状图的X轴的值
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr.push({
+                        'name' :  cdaData[i][0],
+                        'value'  : cdaData[i][1],
+                        selected : true
+                    });
+                }
+                return tempArr;
+            })();
+        return {xAxis : xAxis, series :series};
+    };
+    // option
+    function GetOutletOption1 (XLegends,XDatas){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger : 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter: function(params) {
+                    var res = "疾病大类：" + params.name + '&lt;br/&gt;' + "数量：" + params.value ;
+                    //var res = "人次：" + params.value ;
+                    return res;
+                }
+            },
+            //是否显示拖拽用的手柄,default: false
+            calculable : true,
+            //直角坐标系 grid 中的 x 轴
+            //直角坐标系内绘图网格
+            grid:{
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '2%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '8%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    //坐标轴名称。
+                    name : "疾病大类",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    //是否显示 x 轴。default: true
+                    show : true,
+                    //类目数据
+                    data : XLegends,
+                    //x坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval : 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 15,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            fontSize : 10,
+                            color:"#777"
+                        }
+                    },
+                    //x坐标轴轴线相关设置。
+                    axisLine : {
+                        //是否显示x坐标轴轴线。default: true
+                        show : true,
+                        //x坐标轴线线样式
+                        lineStyle:{
+                            color : "#60b9e3"
+                        }
+                    },
+                    //x坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        //是否显示分隔线。是否显示分隔线
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系 grid 中的 y 轴
+            yAxis : [
+                {
+                    //坐标轴名称。
+                    name : "数量",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //是否显示 y 轴。default: true
+                    show : true,
+                    //数据展示的小数精度。
+                    precision: 2,
+                    //是否是脱离 0 值比例。设置成 true 后坐标刻度不会强制包含零刻度。 default: false
+                    scale : true,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter: '{value}',
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //y坐标轴轴线相关设置。
+                    axisLine : {
+                        //是否显示x坐标轴轴线。default: true
+                        show : true,
+                        //y坐标轴线线样式
+                        lineStyle:{
+                            color : "#60b9e3"
+                        }
+                    },
+                    //y坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        //是否显示分隔线。是否显示分隔线
+                        show: true,
+                        //分隔线
+                        lineStyle:{
+                            //分隔线颜色
+                            color:'#eee'
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔区域，默认不显示。
+                    splitArea:{
+                        //是否显示分隔区域。default: false
+                        show:true,
+                        //分隔区域的样式设置。
+                        areaStyle:{
+                            color:['#f4f8fa','#ffffff']
+                        }
+                    }
+                }
+            ],
+            //系列列表
+            series : [
+                {
+                    //系列名称
+                    name : "疾病大类",
+                    //组件
+                    type : 'bar',
+                    //数据展示的小数精度。
+                    precision: 2,
+                    //柱条的宽度
+                    barWidth : 35,//柱图宽度
+                    //图形样式
+                    itemStyle: {
+                        normal: {
+                            // 柱条的颜色
+                            color: '#5497f2',
+                            // shadowColor: 'rgba(0, 0, 0, 0.4)',
+                            //shadowBlur: 20
+                            //图形上的文本标签
+                            label: {
+                                //是否显示标签。
+                                show: true,
+                                //标签的位置。可选：[x, y]，top，left，right，buttom，inside等
+                                position: 'top',
+                                //标签内容格式器
+                                //{a}：系列名。{b}：数据名。{c}：数据值。{@xxx}：数据中名为'xxx'的维度的值,{@[n]}：数据中维度n的值
+                                formatter: '{c}'
+                            }
+                        }
+                    },
+                    //系列中的数据内容数组
+                    data : XDatas
+                }
+            ]
+        };
+    }
+        </pre>
+        <pre class="C1-2">
+         // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+         //C1-2 堆叠柱形图
+    window.onload=initBarCharts2();
+    function initBarCharts2(){
+        var jcTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=bar_ds22";
+        //jcTypeUrl += "&amp;paramtimestart=" + timestart +"&amp;paramtimeend=" + timeend;
+        var jcTypeJSON = readJSONFile(jcTypeUrl).resultset;
+        var data = barDoubleDataEncapsulation22(jcTypeJSON);
+        chartDrew(GetBarTypeOption22(data.xAxis,data.series,data.series2,data.series3),  // option
+            echarts.init(document.getElementById("C1-2")) //chart
+        );
+    }
+    // 封装数据
+    function barDoubleDataEncapsulation22(cdaData){
+        //获取柱状图的X轴属性
+        var xAxis =
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length/3; i++){
+                    tempArr[i] = cdaData[i][1];
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴的值1
+        var series =
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    if(cdaData[i][0]=='2016'){
+                        tempArr.push({
+                            'name' : cdaData[i][1],
+                            'value'  : cdaData[i][2],
+                            selected : true
+                        });
+                    }
+                }
+                //alert(tempArr);
+                return tempArr;
+            })();
+        //柱状图的X轴的值2
+        var series2 =
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    if(cdaData[i][0]=='2017'){
+                        tempArr.push({
+                            'name' : cdaData[i][1],
+                            'value'  : cdaData[i][2],
+                            selected : true
+                        });
+                    }
+                }
+                return tempArr;
+            })();
+        var series3 =
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    if(cdaData[i][0]=='2015'){
+                        tempArr.push({
+                            'name' : cdaData[i][1],
+                            'value'  : cdaData[i][2],
+                            selected : true
+                        });
+                    }
+                }
+                return tempArr;
+            })();
+        return {
+            xAxis : xAxis,
+            series1 : series,
+            series2 : series2,
+            series3 : series3
+        };
+    };
+    // option
+    function GetBarTypeOption22(XLegends,XDatas1,XDatas2,XDatas3){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'axis'
+            },
+            //图例组件。
+            legend: {
+                //图例的数据数组
+                data:['2016','2017','2015']
+            },
+            //直角坐标系内绘图网格
+            grid:{
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '4%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    //是否显示 x 轴。default: true
+                    show : true,
+                    //类目数据
+                    data : XLegends,
+                    //x坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval : 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 20,
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                        }
+                    },
+                    //x坐标轴轴线相关设置。
+                    axisLine : {
+                        //是否显示x坐标轴轴线。default: true
+                        show : true,
+                        interval : 0,
+                        //x坐标轴线线样式
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //x坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        //是否显示分隔线。
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系 grid 中的 y 轴
+            yAxis : [
+                {
+                    //坐标轴名称。
+                    name : "数量",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter : function(value){
+                            if(value !== 0){
+                                return value;
+                            }else if(value === ""){
+                                return 0;
+                            }else{
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //y坐标轴轴线相关设置。
+                    axisLine : {
+                        //是否显示x坐标轴轴线。default: true
+                        show : true,
+                        //y坐标轴线线样式
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //y坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        //是否显示分隔线。是否显示分隔线
+                        show: false
+                    }
+                }
+            ],
+            //系列列表
+            series : [
+                {
+                    //系列名称
+                    name : "2016",
+                    //组件类型
+                    type : 'bar',
+                    //图形样式
+                    itemStyle : {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color: "rgb(154, 188, 195)",
+                            // barBorderRadius: 10,
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10
+                        },
+                        normal : {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color:"#1885bd"
+                        },
+                    },
+                    //系列中的数据内容数组
+                    data : XDatas1
+                },
+                {
+                    //系列名称
+                    name : "2017",
+                    //组件类型
+                    type : 'bar',
+                    //图形样式
+                    itemStyle : {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:"rgb(168, 227, 215)",
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10
+                        },
+                        normal : {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color:"#99ccff"
+                        }
+                    },
+                    //系列中的数据内容数组
+                    data : XDatas2
+                },
+                {
+                    //系列名称
+                    name : "2015",
+                    //组件类型
+                    type : 'bar',
+                    //图形样式
+                    itemStyle : {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:"rgb(108, 207, 205)",
+                            // barBorderRadius: 10,
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10
+                        },
+                        normal : {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color:"#99d2dd"
+                        }
+                    },
+                    //系列中的数据内容数组
+                    data : XDatas2
+                }
+            ]
+        };
+    };
+      </pre>
+        <pre class="C1-3">
+         // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+    //C1-3 折线、柱形混合图
+    window.onload=initBarCharts3();//加载图表
+    function initBarCharts3(){
+        var lineTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/YZSY_1.cda&dataAccessId=C11_DS";
+        // lineTypeUrl+="&amp;paramtimestart2=" + timestart2+ "&amp;paramtimeend2=" + timeend2 + "&amp;paramgetks2=" + getks2;
+        lineTypeUrl+="&amp;paramtimestart2=" + "20180526"+ "&amp;paramtimeend2=" + "20180626" + "&amp;paramgetks2=" + "ALL";
+        var lineTypeUrl1 = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/YZSY_1.cda&dataAccessId=C1_DS";
+        // lineTypeUrl1+="&amp;paramtimestart2=" + timestart2+ "&amp;paramtimeend2=" + timeend2 + "&amp;paramgetks2=" + getks2;
+        lineTypeUrl1+="&amp;paramtimestart2=" + "20180526"+ "&amp;paramtimeend2=" + "20180626" + "&amp;paramgetks2=" + "ALL";
+        var lineTypeJSON = readJSONFile(lineTypeUrl).resultset;
+        var lineTypeJSON1 = readJSONFile(lineTypeUrl1).resultset;
+        var data = LineMixBarDataEncapsulation(lineTypeJSON,lineTypeJSON1);
+        chartDrew(GetLineMixBarTypeOption(data.xAxis,data.series,data.series2),  // option
+            echarts.init(document.getElementById("C1-3")) //chart
+        );
+    }
+    //封装数据
+    function LineMixBarDataEncapsulation(cdaData1,cdaData2){
+        // line的X轴属性
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData1.length; i++){
+                    tempArr.push({
+                        'name' : cdaData1[i][0],
+                        selected : true
+                    });
+                    tempArr[i] = cdaData1[i][0];
+                }
+                return tempArr;
+            })();
+        //line的X轴1的值
+        var series =
+            (function(){
+                var tempArr1 = [];
+                for(var i = 0; i < cdaData1.length; i++){
+                    tempArr1.push({
+                        'name' : cdaData1[i][0],
+                        'value'  : cdaData1[i][1],
+                        selected : true
+                    });
+                }
+                return tempArr1;
+            })();
+        //line的X轴2的值
+        var series2 =
+            (function(){
+                var tempArr2 = [];
+                for(var i = 0; i < cdaData2.length; i++){
+                    tempArr2.push({
+                        'name' : cdaData2[i][0],
+                        'value'  : cdaData2[i][1],
+                        selected : true
+                    });
+                }
+                return tempArr2;
+            })();
+        return {
+            xAxis : xAxis,
+            series : series,
+            series2 : series2
+        };
+    };
+    //option
+    function GetLineMixBarTypeOption (XLegends,XDatas1,XDatas2){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'axis',
+                //提示框浮层的背景颜色。
+                backgroundColor:'#fff',
+                //提示框浮层的边框颜色。
+                borderColor:'grey',
+                //提示框浮层的文本样式。
+                textStyle:{
+                    color:'grey'
+                }
+            },
+            //图例组件。
+            legend:{
+                //图例的数据数组
+                data:['人次','收入']
+            },
+            //直角坐标系内绘图网格
+            grid: {
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '1.5%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    //是否显示 x 轴。default: true
+                    show : true,
+                    //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样。
+                    boundaryGap : true,
+                    //类目数据
+                    data : XLegends,
+                    //x坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval:0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate:45,
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                            fontSize:12
+                        }
+                    },
+                    //x坐标轴轴线相关设置。
+                    axisLine : {
+                        //是否显示x坐标轴轴线。default: true
+                        show : true,
+                        //x坐标轴线线样式
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        //是否显示坐标轴刻度。
+                        show:false
+                    },
+                    //x坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        //是否显示分隔线。是否显示分隔线
+                        show: false,
+                        //x坐标轴线线样式
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    }
+                }
+            ],
+            //直角坐标系 grid 中的 y 轴
+            yAxis : [
+                {
+                    //坐标轴名称。
+                    name : "人次",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //数据展示的小数精度。
+                    precision: 2,
+                    //是否是脱离 0 值比例。设置成 true 后坐标刻度不会强制包含零刻度。 default: false
+                    scale : true,
+                    //坐标轴刻度最小值。
+                    min:0,
+                    //y 轴的位置。
+                    position: 'left',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter : function(value){
+                            if(value !== 0){
+                                return value;
+                            }else if(value === ""){
+                                return 0;
+                            }else{
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //y坐标轴轴线相关设置。
+                    axisLine : {
+                        //是否显示x坐标轴轴线。default: true
+                        show : true,
+                        //y坐标轴线线样式
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        //是否显示坐标轴刻度。
+                        show:false
+                    },
+                    //y坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        //是否显示分隔线。
+                        show: false,
+                        //分隔线样式
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    },
+                },
+                {
+                    name : "收入",
+                    type : 'value',
+                    //坐标轴刻度最小值。
+                    min:0,
+                    precision: 2,
+                    //是否是脱离 0 值比例。设置成 true 后坐标刻度不会强制包含零刻度。 default: false
+                    scale : true,
+                    position:'right',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        formatter : function(value){
+                            if(value !== 0){
+                                return value;
+                            }else if(value === ""){
+                                return 0;
+                            }else{
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        show:false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    },
+                }
+            ],
+            //系列列表
+            series : [
+                {
+                    //系列名称
+                    name : "收入",
+                    //组件
+                    type : 'line',
+                    //标记的图形。default: 'emptyCircle',
+                    //包括 'circle', 'rect', 'roundRect', 'triangle', 'diamond', 'pin', 'arrow'
+                    symbol:'diamond',
+                    //标记的大小
+                    symbolSize:5,
+                    //是否平滑曲线显示。default: false
+                    smooth: true,
+                    //使用的 y 轴的 index
+                    yAxisIndex: 1,
+                    //折线拐点标志的样式。
+                    itemStyle: {
+                        normal: {
+                            color:"#ff7f36",
+                        },
+                        //图形的高亮样式。
+                        emphasis: {
+                            color:"#ff7f36",
+                        }
+                    },
+                    ////系列中的数据内容数组
+                    data : XDatas1
+                },
+                {
+                    name : "人次",
+                    type : 'bar',
+                    //图标标记
+                    markPoint :{
+                        //标记的图形
+                        symbol:'circle',//拐点样式
+                        //标记的大小
+                        symbolSize:50,//拐点大小
+                    },
+                    //图形样式
+                    itemStyle: {
+                        normal: {
+                            color:"#1790cf ",//曲线颜色
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:"#1790cf ",//曲线颜色
+                        }
+                    },
+                    data : XDatas2
+                }
+            ]
+        };
+    };
+      </pre>
+    </div>
+    <div style="width: 100%;">
+        <div class="child_menu">
+            <!--  折线、柱形图混合堆叠-双轴-->
+            <div id="C1-4" style="width:100%;height:220px;"></div>
+        </div>
+        <div class="child_menu">
+            <!-- 堆叠条形码-->
+            <div id="C1-5" style="width:100%;height:220px;"></div>
+        </div>
+        <div class="child_menu maR0">
+            <!-- 堆叠柱形图-->
+            <div id="C1-6" style="width:100%;height:220px;"></div>
+        </div>
+    </div>
+    <div><span class="glyphicon glyphicon-remove preRemove"></span>
+        <pre class="C1-4">
+    // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+   // C1-4 折线、柱形图混合堆叠-双轴~
+    window.onload=initBarCharts4();//加载图表
+    function initBarCharts4(){
+        var url = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=line1";
+        var url2 = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=line11";
+        var url3 = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=line111";
+        // url += "&amp;parambutton_event=" + button_event + "&amp;paramoutletParam=" + outletParam;
+        // var json = readJSONFile(url).resultset;
+        var data=getBarDataTwo(readJSONFile(url).resultset,readJSONFile(url2).resultset,readJSONFile(url3).resultset);
+        chartDrew(getBarOptionTwo(data.xAxis,data.series,data.series2,data.series3),  // option
+            echarts.init(document.getElementById("C1-4")) //chart
+        );
+    }
+    // 封装数据
+    function getBarDataTwo(json,json2,json3){
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < json.length; i++){tempArr.push({'name' : json[i][0], selected : true});tempArr[i] = json[i][0];}
+                return tempArr;
+            })();
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < json.length; i++){tempArr.push({'name' : json[i][0], 'value'  : json[i][1], selected : true});}
+                return tempArr;
+            })();
+        var series2=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < json2.length; i++){tempArr.push({'name' : json2[i][0], 'value'  : json2[i][1], selected : true});}
+                return tempArr;
+            })();
+        var series3=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < json3.length; i++){tempArr.push({'name' : json3[i][0], 'value'  : json3[i][1], selected : true});}
+                return tempArr;
+            })();
+        return {xAxis : xAxis, series :series, series2 :series2, series3 :series3};
+    }
+    // option
+    function getBarOptionTwo(xAxis,series,series2,series3){
+        return {
+            //提示框组件
+            tooltip : {
+                trigger: 'axis',
+                //提示框浮层的背景颜色。
+                backgroundColor:'#fff',
+                //提示框浮层的边框颜色。
+                borderColor:'grey',
+                //提示框浮层的文本样式。
+                textStyle:{
+                    color:'grey'
+                }
+            },
+            //图例组件。
+            legend:{
+                data:['预约人次','应诊人次','应诊率'],
+                // y:'bottom'
+            },
+            //直角坐标系内绘图网格
+            grid:{
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '4%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    show : true,
+                    //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样。
+                    boundaryGap : true,
+                    data : xAxis,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval:0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate:40,
+                        //刻度标签与轴线之间的距离。
+                        margin:5,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        show:false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        //是否显示x坐标轴轴线。default: true
+                        show: false,
+                        //x坐标轴线线样式
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    }
+                }
+            ],
+            yAxis : [
+                {
+                    //坐标轴名称。
+                    name : "人次",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //数据展示的小数精度。
+                    precision: 2,
+                    //是否是脱离 0 值比例。设置成 true 后坐标刻度不会强制包含零刻度。 default: false
+                    scale : true,
+                    //y 轴的位置。
+                    position: 'left',
+                    //坐标轴刻度最小值。
+                    min:0,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //度标签的内容格式器，支持字符串模板和回调函数两种形式。
+                        formatter : function(value){
+                            if(value !== 0){
+                                return value;
+                            }else if(value === ""){
+                                return 0;
+                            }else{
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        show:false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    },
+                    // splitArea: {show: true
+                    // ,backgroundColor: 'rgba(252, 252, 252, 0.2)'}
+                },
+                {
+                    //坐标轴名称。
+                    name : "应诊率",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //  precision: 2,
+                    // scale : true,
+                    //y 轴的位置。
+                    position:'right',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //度标签的内容格式器，支持字符串模板和回调函数两种形式。
+                        formatter : function(value){
+                            if(value !== 0){
+                                return value+'%';
+                            }else if(value === ""){
+                                return 0;
+                            }else{
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        show:false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    },
+                }
+            ],
+            series : [
+                {
+                    name : "预约人次",
+                    type : 'bar',
+                    //柱条的宽度
+                    barWidth:20,
+                    //使用的 y 轴的 index
+                    yAxisIndex:'0',
+                    //图形样式
+                    itemStyle : {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:"rgb(154, 188, 195)",
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+
+                        },
+                        normal : {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color:"#1790cf"
+                        },
+
+                    },
+                    data : series
+                },
+                {
+                    name : "应诊人次",
+                    type : 'bar',
+                    //柱条的宽度
+                    barWidth:20,
+                    //使用的 y 轴的 index
+                    yAxisIndex:'0',
+                    //图形样式
+                    itemStyle : {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:"rgb(168, 227, 215)",
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+
+                        },
+                        normal : {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color:"#99d2dd"
+                        }
+                    },
+                    data : series2
+                },
+                {
+                    name : "应诊率",
+                    type : 'line',
+                    //标记的图形。default: 'emptyCircle',
+                    //包括 'circle', 'rect', 'roundRect', 'triangle', 'diamond', 'pin', 'arrow'
+                    symbol:'circle',//拐点样式
+                    //标记大小
+                    symbolSize:5,//拐点大小
+                    //是否平滑曲线显示。default: false
+                    smooth: true,
+                    //使用的 y 轴的 index
+                    yAxisIndex:'1',
+                    //折线拐点标志的样式。
+                    itemStyle: {
+                        normal: {
+                            color:"#33CC66",//曲线颜色
+                        },
+                        //图形的高亮样式。
+                        emphasis: {
+                            color:"rgb(100, 133, 155)",
+                            label : {
+                                show: true
+                            }
+                        }
+                    },
+                    data : series3
+                }
+
+
+            ]
+        };
+    }
+        </pre>
+        <pre class="C1-5">
+         // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+     //C1-5 堆叠条形码
+    window.onload=initBarCharts5();
+    function initBarCharts5(){
+        var outletUrl =  "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=bar_ds30";
+        //   outletUrl += "&amp;paramtimestart=" + timestart +"&amp;paramtimeend=" + timeend ;
+        outletUrl += "&amp;paramtimestart=" + "20180626" +"&amp;paramtimeend=" + "20180626" ;
+        //+"&amp;paramgetks=" + getks;
+
+        var outletJSON = readJSONFile(outletUrl).resultset;
+        var data =BarDataEncapsulation2(outletJSON);
+        chartDrew(GetOutletOption2(data.xAxis,data.series,data.series2),  // option
+            echarts.init(document.getElementById("C1-5")) //chart
+        );
+    }
+    // 封装数据
+    function BarDataEncapsulation2 (cdaData){
+        // 柱状图的X轴属性
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr[i] = cdaData[i][0];
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴1的值（欠费）
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    //   cdaData[i][1]=cdaData[i][1].substring(0,cdaData[i][1].lastIndexOf('%'));
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        'value'  : cdaData[i][1],
+                        selected : true
+                    });
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴2的值（未欠费）
+        var series2=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        'value'  : cdaData[i][2],
+                        selected : true
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            xAxis : xAxis,
+            series : series,
+            series2 : series2
+        };
+    };
+    // option
+    function GetOutletOption2 (XLegends,XDatas1,XDatas2){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'axis',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter: function(params) {
+                    return params[0].name + '&lt;br/&gt;'
+                        + params[1].seriesName + ' : ' + params[1].value + '&lt;br/&gt;'
+                        + params[0].seriesName + ' : ' + params[0].value ;
+                }
+            },
+            //图例组件。
+            legend: {
+                data:['2016', '2017']
+            },
+            yAxis : [
+                {
+                    name : "类型",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    show : true,
+                    //data : SecondBarDataEncapsulation.getLegends(),
+                    data : XLegends,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval : 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 30,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                            fontSize : 10
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+
+                        lineStyle:{
+                            color:"#777"
+                        },
+                        color : "#007AC7"
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系内绘图网格
+            grid:{
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '8%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    name : "金额",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter: '{value}',
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval : 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 30,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        interval : 0,
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false
+                    }
+                }
+            ],
+            //系列列表。
+            series : [
+                {
+                    name : "2016",
+                    type : 'bar',
+                    //数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+                    stack: '总量',
+                    //图形样式
+                    itemStyle : {
+                        normal : {
+                            // color : "rgba(182, 162, 222)",
+                            color:"#1790cf",//曲线颜色
+                            label : {
+                                show : true,
+                                position : 'insideTop',
+                                textStyle: {
+                                    color:"white"
+                                }
+                            },
+                            //圆角半径
+                            barBorderRadius:0,
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:"#99CCFF",//曲线颜色
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        },
+
+                    },
+                    data : XDatas2
+                },
+                {
+                    name : "2017",
+                    type : 'bar',
+                    //数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+                    stack: '总量',
+                    //图形样式
+                    itemStyle : {
+                        normal : {
+                            color : "#99d2dd",
+                            label : {
+                                show : true,
+                                position : 'insideTop',
+                                textStyle: {
+                                    color:"black"
+                                }
+                            },
+                            //圆角半径
+                            barBorderRadius:0,
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:'rgba(159, 135, 208, 0.57)',
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        }
+                    },
+                    data : XDatas1
+                }
+            ]
+        };
+    };
+      </pre>
+        <pre class="C1-6">
+         // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+        //C1-6 堆叠柱形图
+    window.onload=initBarCharts6();
+    function initBarCharts6(){
+        var outletUrl =  "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/ZYQFZE.cda&dataAccessId=zyqfmx_qfrc_bar_ds";
+        // outletUrl += "&amp;paramtimestart=" + timestart +"&amp;paramtimeend=" + timeend  +"&amp;paramgetks=" + getks;
+        var outletJSON = readJSONFile(outletUrl).resultset;
+        var data = BarDataEncapsulation(outletJSON);
+        chartDrew(GetOutletOption(data.xAxis,data.series,data.series2),  // option
+            echarts.init(document.getElementById("C1-6")) //chart
+        );
+    }
+    // 封装数据
+    function BarDataEncapsulation (cdaData){
+        // 柱状图的X轴属性
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr[i] = cdaData[i][0];
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴1的值（欠费）
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    //   cdaData[i][1]=cdaData[i][1].substring(0,cdaData[i][1].lastIndexOf('%'));
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        'value'  : cdaData[i][1],
+                        selected : true
+                    });
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴2的值（未欠费）
+        var series2=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    //     cdaData[i][2]=cdaData[i][2].substring(0,cdaData[i][2].lastIndexOf('%'));
+                    //alert(cdaData[i][2]);
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        'value'  : cdaData[i][2],
+                        selected : true
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            xAxis : xAxis,
+            series : series,
+            series2 : series2
+        };
+    };
+    // option
+    function GetOutletOption (XLegends,XDatas1,XDatas2){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'axis',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter: function(params) {
+                    return params[0].name + '&lt;br/&gt;'
+                        + params[1].seriesName + ' : ' + params[1].value + '% &lt;br/&gt;'
+                        + params[0].seriesName + ' : ' + params[0].value + '%';
+                }
+            },
+            //图例组件。
+            legend: {
+                data:['欠费占比', '未欠费占比']
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    name : "科室病区",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    show : true,
+                    data : XLegends,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval : 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 25,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                            fontSize : 10
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系内绘图网格
+            grid:{
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '8.5%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+
+            },
+            yAxis : [
+                {
+                    name : "金额占比",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter: '{value}%',
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false
+                    }
+                }
+            ],
+            series : [
+                {
+                    name : "未欠费占比",
+                    type : 'bar',
+                    //数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+                    stack: '总量',
+                    //柱条的宽度
+                    barWidth:60,
+                    itemStyle : {
+                        normal : {
+                            color:"#1790cf",//曲线颜色
+                            label : {
+                                show : true,
+                                position : 'insideTop',
+                                textStyle: {
+                                    color:"white"
+                                }
+                            },
+                            barBorderRadius:0,
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:"#1790cf",//曲线颜色
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        },
+
+                    },
+                    data : XDatas2
+                },
+                {
+                    name : "欠费占比",
+                    type : 'bar',
+                    //数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+                    stack: '总量',
+                    //柱条的宽度
+                    barWith:60,
+                    itemStyle : {
+                        normal : {
+                            color:'#99d2dd',
+                            label : {
+                                show : true,
+                                position : 'top',
+                                textStyle: {
+                                    color:"black"
+                                }
+                            },
+                            //圆角半径
+                            barBorderRadius:0,
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:'#99d2dd',
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        }
+                    },
+                    data : XDatas1
+                }
+            ]
+        };
+    };
+      </pre>
+    </div>
+    <div style="width: 100%;">
+        <div class="child_menu">
+
+            <div id="C1-7" style="width:100%;height:220px;"></div>
+        </div>
+        <div class="child_menu">
+
+            <div id="C1-8" style="width:100%;height:220px;"></div>
+        </div>
+        <div class="child_menu maR0">
+
+            <div id="C1-9" style="width:100%;height:220px;"></div>
+        </div>
+    </div>
+    <div><span class="glyphicon glyphicon-remove preRemove"></span>
+        <pre class="C1-7">
+    // 请求接口
+    function readJSONFile(url) {
+        var jsonData;
+        $.ajax({
+            type: 'GET', url: url, async: false, dataType: 'json', data: null,
+            success: function (response) {
+                jsonData = response;
+            }
+        });
+        return jsonData;
+    }
+
+    // 绘制图表
+    function chartDrew(option, chart) {
+        chart.setOption(option);
+        window.addEventListener('resize', function () {
+            chart.resize();
+        })
+    }
+    window.onload = initBarCharts7();
+
+    function initBarCharts7() {
+        var dataValue = getBarData1();
+        var option = GetBarTypeOption1(dataValue.xAxisData, dataValue.seriesData1, dataValue.seriesData2);
+        var dom = document.getElementById("C1-7");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getBarData1() {
+        var xAxisData = ['东沙湖所', '湖东所', '湖西所', '娄葑所', '胜浦所', '唯亭所', '斜塘所', '半岛所', '永安桥所', '综保所'];
+        var seriesData1 = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        var seriesData2 = [100, 290, 310, 170, 120, 150, 140, 230, 220, 110];
+        return {xAxisData: xAxisData, seriesData1: seriesData1, seriesData2: seriesData2};
+    }
+
+    function GetBarTypeOption1(xAxisData, seriesData1, seriesData2) {
+        return {
+            //  "backgroundColor":"#0C3053",
+            grid: {
+                left: '3%',
+                right: '5%',
+                top: '5%',
+                bottom: '5%',
+                containLabel: true
+            },
+            xAxis: [{
+                type: 'category',
+                data: xAxisData,
+                axisLine: {
+                    show: false,
+                    lineStyle: {
+                        color: "#063374",
+                        width: 1,
+                        type: "solid"
+                    }
+                },
+                axisTick: {
+                    show: false
+                },
+                axisLabel: {
+                    show: true,
+                    textStyle: {
+                        color: '#777'
+                        // color: "#00c7ff",
+                    },
+                    rotate: 30,
+                },
+            }],
+            yAxis: [{
+                show: false,
+                type: 'value',
+                // axisLabel: {
+                //     formatter: '{value} %'
+                // },
+                axisLine: {
+                    show: false,
+                    lineStyle: {
+                        color: "#00c7ff",
+                        width: 1,
+                        type: "solid"
+                    },
+                },
+                axisTick: {
+                    show: false
+                },
+                splitLine: {
+                    show: false,
+                    lineStyle: {
+                        color: "#063374",
+                    }
+                }
+            }],
+            series: [{
+                "type": "bar",
+                "barWidth": "40%",
+                //数据堆叠
+                "stack": "b",
+                //是否启用图例 hover 时的联动高亮。
+                "legendHoverLink": false,
+                "itemStyle": {
+                    "normal": {
+                        "color": "rgba(0,0,0,0)"
+                    }
+                },
+                "data": seriesData1
+            },
+
+                {
+                    "type": "bar",
+                    "barWidth": "30%",
+                    "stack": "b",
+                    "label": {
+                        "normal": {
+                            "show": true,
+                            position: 'top',
+                            //   "position": ["200","0"],
+                            //  "offset": [100, 0],
+                            "textStyle": {
+                                "fontSize": 12,
+                                "color": "#777"
+                            },
+                            "formatter": "{c}"
+                        }
+                    },
+                    "legendHoverLink": false,
+                    "silent": true,
+                    itemStyle: {
+                        normal: {
+                            barBorderRadius: 30,
+                            color: new echarts.graphic.LinearGradient(
+                                0, 1, 0, 0, [{
+                                    offset: 0,
+                                    color: '#AEDDBA'
+                                },
+                                    {
+                                        offset: 1,
+                                        color: '#00c0e9'
+                                    }
+                                ]
+                            )
+
+                        }
+                    },
+                    "data": seriesData2
+                },
+
+
+            ]
+        };
+    }
+        </pre>
+        <pre class="C1-8">
+     // 请求接口
+    function readJSONFile(url) {
+        var jsonData;
+        $.ajax({
+            type: 'GET', url: url, async: false, dataType: 'json', data: null,
+            success: function (response) {
+                jsonData = response;
+            }
+        });
+        return jsonData;
+    }
+
+    // 绘制图表
+    function chartDrew(option, chart) {
+        chart.setOption(option);
+        window.addEventListener('resize', function () {
+            chart.resize();
+        })
+    }
+    window.onload = initBarCharts8();
+
+    function initBarCharts8() {
+        var dataValue = getBarData2();
+        var option = GetBarTypeOption2(dataValue.legendData, dataValue.seriesData1, dataValue.seriesData2, dataValue.seriesData3, dataValue.seriesData4, dataValue.seriesData5, dataValue.seriesData6);
+        var dom = document.getElementById("C1-8");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getBarData2() {
+        var legendData = ['东沙湖所', '湖东所', '湖西所', '娄葑所', '胜浦所', '唯亭所', '斜塘所', '半岛所', '永安桥所', '综保所'];
+        var seriesData1 = [750, 832, 901, 934, 1290, 1330, 1320, 820, 832, 901];
+        var seriesData2 = [150, 302, 301, 334, 390, 330, 320, 320, 302, 301];
+        var seriesData3 = [150, 132, 101, 134, 90, 230, 210, 120, 132, 101];
+        var seriesData4 = [150, 182, 191, 234, 290, 330, 310, 220, 182, 191];
+        var seriesData5 = [150, 212, 201, 154, 190, 330, 410, 150, 212, 201];
+        var seriesData6 = [150, 832, 901, 934, 1290, 1330, 1320, 820, 832, 901];
+        return {
+            legendData: legendData,
+            seriesData1: seriesData1,
+            seriesData2: seriesData2,
+            seriesData3: seriesData3,
+            seriesData4: seriesData4,
+            seriesData5: seriesData5,
+            seriesData6: seriesData6
+        }
+    }
+
+    function GetBarTypeOption2(legendData, seriesData1, seriesData2, seriesData3, seriesData4, seriesData5, seriesData6) {
+        return {
+            // backgroundColor:'#0C3053',
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                    type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                }
+            },
+            // color: ['#047eca','#4BB3D4','#3b64a6','#0d9abb','#00c0e9','#0284FF','#5d3ec5'],
+            color: [
+
+                '#e38980',
+                '#f7db88',
+                '#7777eb',
+                '#00e9db',
+                '#00c0e9',
+                '#70ffac',
+                '#85b6b2',
+                '#cd5e7e',
+                '#e38980',
+                '#f7db88'
+            ],
+            legend: {
+                data: legendData
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            yAxis: {
+                splitLine: false,
+                type: 'value',
+                axisLine: {
+
+                    lineStyle: {
+                        color: '#777'
+                    }
+                },
+                axisLabel: {
+                    color: '#777',
+                    interval: 0,
+                    fontSize: 12,
+
+                }
+            },
+            xAxis: {
+                type: 'category',
+                axisLine: {
+                    lineStyle: {
+                        color: '#777'
+                    }
+                },
+                axisLabel: {
+                    color: '#777',
+                    interval: 0,
+                    fontSize: 12,
+                    rotate: 30,
+
+                },
+
+                data: legendData
+            },
+            series: [
+
+                {
+                    name: '车库总量',
+                    type: 'line',
+                    show: true,
+                    stack: 'sum',
+                    itemStyle: {
+                        normal: {
+                            shadowBlur: 5,
+                            shadowColor: 'white'
+                        }
+                    },
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'insideRight'
+                        }
+                    },
+                    data: seriesData1
+                },
+                {
+                    barWidth: '40%',
+                    name: '经营',
+                    type: 'bar',
+                    stack: '总量',
+                    itemStyle: {
+                        normal: {
+                            shadowBlur: 5,
+                            // shadowColor: 'white'
+                            barBorderRadius: 2,
+                        }
+                    },
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'insideRight'
+                        }
+                    },
+                    data: seriesData2
+                },
+                {
+                    name: '仓库',
+                    type: 'bar',
+                    stack: '总量',
+                    itemStyle: {
+                        normal: {
+                            shadowBlur: 5,
+                            // shadowColor: 'white'
+                            barBorderRadius: 2,
+                        }
+                    },
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'insideRight'
+                        }
+                    },
+                    data: seriesData3
+                },
+                {
+                    name: '空关',
+                    type: 'bar',
+                    stack: '总量',
+                    itemStyle: {
+                        normal: {
+                            shadowBlur: 5,
+                            //   shadowColor: 'white'
+                            barBorderRadius: 2,
+                        }
+                    },
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'insideRight'
+                        }
+                    },
+                    data: seriesData4
+                },
+                {
+                    name: '自住',
+                    type: 'bar',
+                    stack: '总量',
+                    itemStyle: {
+                        normal: {
+                            shadowBlur: 5,
+                            //    shadowColor: 'white'
+                            barBorderRadius: 2,
+                        }
+                    },
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'insideRight'
+                        }
+                    },
+                    data: seriesData5
+                },
+                {
+                    name: '租住',
+                    type: 'bar',
+                    stack: '总量',
+                    itemStyle: {
+                        normal: {
+                            shadowBlur: 5,
+                            //   shadowColor: 'white'
+                            barBorderRadius: 2,
+                        }
+                    },
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'insideRight'
+                        }
+                    },
+                    data: seriesData6
+                }
+
+            ]
+        };
+    }
+      </pre>
+        <pre class="C1-9">
+    // 请求接口
+    function readJSONFile(url) {
+        var jsonData;
+        $.ajax({
+            type: 'GET', url: url, async: false, dataType: 'json', data: null,
+            success: function (response) {
+                jsonData = response;
+            }
+        });
+        return jsonData;
+    }
+
+    // 绘制图表
+    function chartDrew(option, chart) {
+        chart.setOption(option);
+        window.addEventListener('resize', function () {
+            chart.resize();
+        })
+    }
+
+    window.onload = initBarCharts9();
+
+    function initBarCharts9() {
+        var dataValue = getBarData3();
+        var option = GetBarTypeOption3(dataValue.xAxisData, dataValue.seriesData1, dataValue.seriesData2);
+        var dom = document.getElementById("C1-9");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getBarData3() {
+        var xAxisData = ['东沙湖所', '湖东所', '湖西所', '娄葑所', '胜浦所', '唯亭所', '斜塘所', '半岛所', '永安桥所', '综保所'];
+        var seriesData1 = [2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162, 32.6, 20.0];
+        var seriesData2 = [2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8];
+        return {xAxisData: xAxisData, seriesData1: seriesData1, seriesData2: seriesData2};
+    }
+
+    function GetBarTypeOption3(xAxisData, seriesData1, seriesData2) {
+        return {
+            // "backgroundColor":"#0C3053",
+            // color: colorList,
+            legend: {
+                data: ['工地流动人口', '流动人口'],
+                textStyle: {
+                    color: '#777',
+                },
+                orient: 'vertical',
+                left: '3%',
+            },
+
+            calculable: true,
+            grid: {
+                left: '3%',
+                right: '4%',
+                top: '8%',
+                bottom: '5%',
+                containLabel: true
+            },
+            yAxis: {
+                show: false,
+                splitLine: false,
+                type: 'value',
+                axisLine: {
+                    show: false,
+                    lineStyle: {
+                        color: '#0177d4'
+                    }
+                },
+
+            },
+            xAxis: {
+                type: 'category',
+                axisLine: {
+                    lineStyle: {
+                        color: '#0177d4'
+                    }
+                },
+                axisLabel: {
+                    color: '#777',
+                    interval: 0,
+                    fontSize: 12,
+                    rotate: 30,
+
+                },
+                data: xAxisData
+            },
+            series: [
+                {
+                    name: '工地流动人口',
+                    type: 'bar',
+
+                    itemStyle: {
+                        normal: {
+                            barBorderRadius: 10,
+                            //  barBorderRadius: [0, 0, 0, 0],
+                            color: new echarts.graphic.LinearGradient(
+                                0, 0, 0, 1, [{
+                                    offset: 0,
+                                    color: '#027eff'
+                                },
+
+                                    {
+                                        offset: 1,
+
+                                        color: '#00feff'
+                                    }
+                                ]
+                            )
+                        }
+                    },
+                    data: seriesData1,
+                    markPoint: {
+                        label: {show: true, color: '#0177d4'},
+                        data: [
+                            {type: 'max', name: '最大值'},
+                            {type: 'min', name: '最小值'}
+                        ]
+                    },
+                    markLine: {
+                        label: {show: true, color: '#0177d4'},
+                        data: [
+                            {type: 'average', name: '平均值'}
+                        ]
+                    }
+                },
+                {
+                    name: '流动人口',
+                    type: 'bar',
+                    itemStyle: {
+                        normal: {
+                            barBorderRadius: 10,
+                            //barBorderRadius: [0, 0, 0, 0],
+                            color:
+                            // '#F0E68C',
+                                new echarts.graphic.LinearGradient(
+                                    0, 0, 0, 1, [{
+                                        offset: 0,
+                                        // color: '#00E9DB'
+                                        color: '#F0E68C'
+                                    },
+                                        {
+                                            offset: 1,
+                                            color: '#ffffff'
+                                        }
+                                    ]
+                                )
+                        }
+                    },
+                    data: seriesData2,
+                    markPoint: {
+                        label: {show: true, color: '#027eff'},
+                        data: [
+                            {name: '最高', value: 182, xAxis: 7, yAxis: 183},
+                            {name: '最低', value: 2, xAxis: 11, yAxis: 3}
+                        ]
+                    },
+                    markLine: {
+                        label: {show: true, color: '#0177d4'},
+                        data: [
+                            {type: 'average', name: '平均值'}
+                        ]
+                    }
+                }
+            ]
+        };
+    }
+      </pre>
+    </div>
+    <div style="width: 100%;">
+        <div class="child_menu">
+
+            <div id="C1-10" style="width:100%;height:220px;"></div>
+        </div>
+        <div class="child_menu">
+
+            <div id="C1-11" style="width:100%;height:220px;"></div>
+        </div>
+        <div class="child_menu">
+
+            <div id="C1-12" style="width:100%;height:220px;"></div>
+        </div>
+
+    </div>
+    <div><span class="glyphicon glyphicon-remove preRemove"></span>
+        <pre class="C1-10">
+    // 请求接口
+    function readJSONFile(url) {
+        var jsonData;
+        $.ajax({
+            type: 'GET', url: url, async: false, dataType: 'json', data: null,
+            success: function (response) {
+                jsonData = response;
+            }
+        });
+        return jsonData;
+    }
+
+    // 绘制图表
+    function chartDrew(option, chart) {
+        chart.setOption(option);
+        window.addEventListener('resize', function () {
+            chart.resize();
+        })
+    }
+
+    window.onload = initBarCharts10();
+
+    function initBarCharts10() {
+        var dataValue = getBarData4();
+        var option = GetBarTypeOption4(dataValue.xAxisData, dataValue.seriesData1, dataValue.seriesData2);
+        var dom = document.getElementById("C1-10");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getBarData4() {
+        var xAxisData = ['第二人民医院', '人民医院', '中联基层', '东沟卫生院', '中联公卫', '计划免疫', '疾控中心', '妇幼保健', '中联电子病历', '中医院'];
+        var seriesData1 = [100, 98, 95, 90, 85, 80, 76, 70, 65, 60];
+        var seriesData2 = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100];
+        return {xAxisData: xAxisData, seriesData1: seriesData1, seriesData2: seriesData2};
+    }
+
+    function GetBarTypeOption4(xAxisData, seriesData1, seriesData2) {
+        return {
+            // backgroundColor: '#011c3a',
+            //      "title": {
+            //   "text": "上传进度排名",
+            //   "left": "center",
+            //   "y": "10",
+            //   "textStyle": {
+            //     "color": "#fff",
+            //     fontSize:'20px',
+            //
+            //   }
+            // },
+            xAxis: {
+                data: xAxisData,
+                axisLine: {
+                    lineStyle: {
+                        color: '#0177d4'
+                    }
+                },
+                axisLabel: {
+                    color: '#777',
+                    interval: 0,
+                    fontSize: 8,
+                    rotate: 30,
+
+                }
+            },
+            yAxis: {
+                show: false,
+                name: "",
+                nameTextStyle: {
+                    color: '#fff',
+                    fontSize: 12
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#0177d4'
+                    }
+                },
+                axisLabel: {
+                    color: '#fff',
+                    fontSize: 12
+                },
+                splitLine: {
+                    show: false,
+                    lineStyle: {
+                        color: '#0177d4'
+                    }
+                },
+                // interval:500,
+                //    max:5000
+
+            },
+            grid: {
+                //left: '0%',
+                //right: '0%',
+                //bottom: '15%',
+                top: '20%',
+                //height: '85%',
+                containLabel: true,
+                z: 22
+            },
+            series: [{
+                type: 'bar',
+                barWidth: '50%',
+                xAxisIndex: 0,
+                yAxisIndex: 0,
+                itemStyle: {
+                    normal: {
+                        barBorderRadius: [0, 0, 0, 0],
+                        color: new echarts.graphic.LinearGradient(
+                            0, 0, 0, 1, [{
+                                offset: 0,
+                                color: '#00feff'
+                            },
+
+                                {
+                                    offset: 1,
+                                    color: '#027eff'
+                                }
+                            ]
+                        )
+                    }
+                },
+                data: seriesData1,
+                zlevel: 11
+
+            },
+                {
+                    name: '',
+                    type: 'bar',
+                    barWidth: '50%',
+                    xAxisIndex: 0,
+                    yAxisIndex: 0,
+                    //不同系列的柱间距离,'-100%': 用柱子做背景
+                    barGap: '-100%',
+                    data: seriesData2,
+                    itemStyle: {
+                        normal: {
+                            color: '#9E9E9E'//rgba(255,255,255,0.1)
+                        }
+                    },
+                    zlevel: 9
+                },
+
+            ]
+        }
+    }
+        </pre>
+        <pre class="C1-11">
+    // 请求接口
+    function readJSONFile(url) {
+        var jsonData;
+        $.ajax({
+            t
+            ype: 'GET', url: url, async: false, dataType: 'json', data: null,
+            success: function (response) {
+                jsonData = response;
+            }
+        });
+        return jsonData;
+    }
+
+    // 绘制图表
+    function chartDrew(option, chart) {
+        chart.setOption(option);
+        window.addEventListener('resize', function () {
+            chart.resize();
+        })
+    }
+    window.onload = initBarCharts11();
+
+    function initBarCharts11() {
+        var dataValue = getBarData5();
+        var option = GetBarTypeOption5(dataValue.yAxisData, dataValue.seriesData1, dataValue.seriesData2);
+        var dom = document.getElementById("C1-11");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getBarData5() {
+        var yAxisData = ['东沙湖所', '湖东所', '湖西所', '娄葑所', '胜浦所', '唯亭所', '斜塘所', '半岛所', '永安桥所', '综保所'];
+        var seriesData1 = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        var seriesData2 = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+        return {yAxisData: yAxisData, seriesData1: seriesData1, seriesData2: seriesData2};
+    }
+
+    function GetBarTypeOption5(yAxisData, seriesData1, seriesData2) {
+        return {
+            // "backgroundColor":"#0C3053",
+            "grid": {
+                "left": "5%",
+                "right": "10%",
+                "top": "5%",
+                "bottom": "3%",
+                "containLabel": true
+            },
+            "xAxis": {
+                "type": "value",
+                "max": [120],
+                "splitLine": {
+                    "show": false
+                },
+                "axisLine": {
+                    "show": false
+                },
+                "axisLabel": {
+                    "show": false
+                },
+                "axisTick": {
+                    "show": false
+                },
+            },
+            "yAxis": {
+                "type": "category",
+                "inverse": false,
+                "data": [],
+                "axisLine": {
+                    "show": false
+                },
+                "axisTick": {
+                    "show": false
+                },
+                "axisLabel": {
+                    "show": true,
+                    "textStyle": {
+                        "fontSize": 12,
+                        "color": "#777"
+                    }
+                },
+                data: yAxisData
+            },
+            "series": [{
+                "type": "bar",
+                "barWidth": "40%",
+                "stack": "b",
+                //是否启用图例 hover 时的联动高亮。
+                "legendHoverLink": false,
+                "itemStyle": {
+                    "normal": {
+                        "color": "rgba(0,0,0,0)"
+                    }
+                },
+                "data": seriesData1
+            }, {
+                "type": "bar",
+                "barWidth": "30%",
+                "stack": "b",
+                "label": {
+                    "normal": {
+                        "show": true,
+                        position: 'right',
+                        //   "position": ["200","0"],
+                        //  "offset": [100, 0],
+                        "textStyle": {
+                            "fontSize": 12,
+                            "color": "#777"
+                        },
+                        "formatter": "{c}"
+                    }
+                },
+                "legendHoverLink": false,
+                "silent": true,
+                itemStyle: {
+                    normal: {
+                        barBorderRadius: 30,
+                        color: new echarts.graphic.LinearGradient(
+                            0, 0, 1, 0, [{
+                                offset: 0,
+                                color: '#AEDDBA'
+                            },
+                                {
+                                    offset: 1,
+                                    color: '#00c0e9'
+                                }
+                            ]
+                        )
+                    }
+                },
+                "data": seriesData2
+            },
+            ]
+        };
+    }
+      </pre>
+
+    </div>
+    <div style="width: 100%;">
+        <div class="child_menu">
+            <div id="C1-13" style="width:100%;height:220px;"></div>
+        </div>
+    </div>
+    <div><span class="glyphicon glyphicon-remove preRemove"></span>
+        <pre class="C1-13">
+
+        </pre>
+    </div>
+
+</div>
+<div>
+
+</div>
+</body>
+<script>
+    $(document).on('click', '.child_menu p', function (event) {
+        event.stopPropagation();
+        if (typeof($(this).attr("data-url")) == "undefined") {
+            console.log("没有链接")
+        } else {
+            var url = $(this).attr("data-url");
+            var title = $(this).text();
+            parent.window.addTab(title, url);
+        }
+    });
+    $('.child_menu>div').click(function () {
+        $('pre').parent().children('span').css({display: 'none'});
+        $('.child_menu>div').parent().css({'border-color': '#ddd'});
+        $(this).parent().css({'border-color': '#5497f2'});
+        var id = $(this)[0].id;
+        $('pre').removeClass('on');
+        $('.' + id).addClass('on');
+        $('.' + id).parent().children('span').css({display: 'block'});
+    });
+    $('.preRemove').click(function () {
+        $('pre.on').parent().children('span').css({display: 'none'});
+        $('pre.on').removeClass('on');
+    })
+</script>
+<script>
+    // 请求接口
+    function readJSONFile(url) {
+        var jsonData;
+        $.ajax({
+            type: 'GET', url: url, async: false, dataType: 'json', data: null,
+            success: function (response) {
+                jsonData = response;
+            }
+        });
+        return jsonData;
+    }
+
+    // 绘制图表
+    function chartDrew(option, chart) {
+        chart.setOption(option);
+        window.addEventListener('resize', function () {
+            chart.resize();
+        })
+    }
+
+    <!-- 柱状 start-->
+
+    //C1-1 柱形图
+    window.onload = initBarCharts1();
+
+    function initBarCharts1() {
+        var itemCategoryUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/CHJB.cda&dataAccessId=bar_ds4";
+        // itemCategoryUrl += "&parambutton_event=" + button_event + "&paramoutletParam=" + outletParam;
+
+        // var data = BarDataEncapsulation1(readJSONFile(itemCategoryUrl).resultset);
+        var data = getData1();
+        chartDrew(GetOutletOption1(data.xAxis, data.series),  // option
+            echarts.init(document.getElementById("C1-1")) //chart
+        );
+    }
+
+    // 封装数据
+    function BarDataEncapsulation1(cdaData) {
+        // 柱状图的X轴属性
+        var xAxis =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length; i++) {
+                    tempArr.push({
+                        'name': cdaData[i][0],
+                        selected: true
+                    });
+                    tempArr[i] = cdaData[i][0];
+                }
+                return tempArr;
+            })()
+
+        //柱状图的X轴的值
+        var series =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length; i++) {
+                    tempArr.push({
+                        'name': cdaData[i][0],
+                        'value': cdaData[i][1],
+                        selected: true
+                    });
+                }
+                return tempArr;
+            })();
+        return {xAxis: xAxis, series: series};
+    };
+
+    // option
+    function GetOutletOption1(XLegends, XDatas) {
+        return {
+            //提示框组件
+            tooltip: {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter: function (params) {
+                    var res = "疾病大类：" + params.name + '<br/>' + "数量：" + params.value;
+                    //var res = "人次：" + params.value ;
+                    return res;
+                }
+            },
+            //是否显示拖拽用的手柄,default: false
+            calculable: true,
+            //直角坐标系 grid 中的 x 轴
+            //直角坐标系内绘图网格
+            grid: {
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '2%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '8%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top: '20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis: [
+                {
+                    //坐标轴名称。
+                    name: "疾病大类",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation: "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type: 'category',
+                    //是否显示 x 轴。default: true
+                    show: true,
+                    //类目数据
+                    data: XLegends,
+                    //x坐标轴刻度标签的相关设置。
+                    axisLabel: {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval: 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 15,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            fontSize: 10,
+                            color: "#777"
+                        }
+                    },
+                    //x坐标轴轴线相关设置。
+                    axisLine: {
+                        //是否显示x坐标轴轴线。default: true
+                        show: true,
+                        //x坐标轴线线样式
+                        lineStyle: {
+                            color: "#60b9e3"
+                        }
+                    },
+                    //x坐标轴在 grid 区域中的分隔线。
+                    splitLine: {
+                        //是否显示分隔线。是否显示分隔线
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系 grid 中的 y 轴
+            yAxis: [
+                {
+                    //坐标轴名称。
+                    name: "数量",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation: "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type: 'value',
+                    //是否显示 y 轴。default: true
+                    show: true,
+                    //数据展示的小数精度。
+                    precision: 2,
+                    //是否是脱离 0 值比例。设置成 true 后坐标刻度不会强制包含零刻度。 default: false
+                    scale: true,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel: {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter: '{value}',
+                        //刻度标签与轴线之间的距离。
+                        margin: 10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //y坐标轴轴线相关设置。
+                    axisLine: {
+                        //是否显示x坐标轴轴线。default: true
+                        show: true,
+                        //y坐标轴线线样式
+                        lineStyle: {
+                            color: "#60b9e3"
+                        }
+                    },
+                    //y坐标轴在 grid 区域中的分隔线。
+                    splitLine: {
+                        //是否显示分隔线。是否显示分隔线
+                        show: true,
+                        //分隔线
+                        lineStyle: {
+                            //分隔线颜色
+                            color: '#eee'
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔区域，默认不显示。
+                    splitArea: {
+                        //是否显示分隔区域。default: false
+                        show: true,
+                        //分隔区域的样式设置。
+                        areaStyle: {
+                            color: ['#f4f8fa', '#ffffff']
+                        }
+                    }
+                }
+            ],
+            //系列列表
+            series: [
+                {
+                    //系列名称
+                    name: "疾病大类",
+                    //组件
+                    type: 'bar',
+                    //数据展示的小数精度。
+                    precision: 2,
+                    //柱条的宽度
+                    barWidth: 35,//柱图宽度
+                    //图形样式
+                    itemStyle: {
+                        normal: {
+                            // 柱条的颜色
+                            color: '#5497f2',
+                            // shadowColor: 'rgba(0, 0, 0, 0.4)',
+                            //shadowBlur: 20
+                            //图形上的文本标签
+                            label: {
+                                //是否显示标签。
+                                show: true,
+                                //标签的位置。可选：[x, y]，top，left，right，buttom，inside等
+                                position: 'top',
+                                //标签内容格式器
+                                //{a}：系列名。{b}：数据名。{c}：数据值。{@xxx}：数据中名为'xxx'的维度的值,{@[n]}：数据中维度n的值
+                                formatter: '{c}'
+                            }
+                        }
+                    },
+                    //系列中的数据内容数组
+                    data: XDatas
+
+                }
+            ]
+        };
+    }
+
+    //C1-2 堆叠柱形图
+    window.onload = initBarCharts2();
+
+    function initBarCharts2() {
+        var jcTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=bar_ds22";
+        //jcTypeUrl += "&paramtimestart=" + timestart +"&paramtimeend=" + timeend;
+
+        // var jcTypeJSON = readJSONFile(jcTypeUrl).resultset;
+        // var data = barDoubleDataEncapsulation22(jcTypeJSON);
+        var data = getData3();
+        chartDrew(GetBarTypeOption22(data.xAxis, data.series, data.series2, data.series3),  // option
+            echarts.init(document.getElementById("C1-2")) //chart
+        );
+    }
+
+    // 封装数据
+    function barDoubleDataEncapsulation22(cdaData) {
+        //获取柱状图的X轴属性
+        var xAxis =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length / 3; i++) {
+
+                    tempArr[i] = cdaData[i][1];
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴的值1
+        var series =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length; i++) {
+
+                    if (cdaData[i][0] == '2016') {
+                        tempArr.push({
+                            'name': cdaData[i][1],
+                            'value': cdaData[i][2],
+                            selected: true
+                        });
+                    }
+                }
+                //alert(tempArr);
+                return tempArr;
+            })();
+        //柱状图的X轴的值2
+        var series2 =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length; i++) {
+                    if (cdaData[i][0] == '2017') {
+                        tempArr.push({
+                            'name': cdaData[i][1],
+                            'value': cdaData[i][2],
+                            selected: true
+                        });
+                    }
+                }
+                return tempArr;
+            })();
+        var series3 =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length; i++) {
+                    if (cdaData[i][0] == '2015') {
+                        tempArr.push({
+                            'name': cdaData[i][1],
+                            'value': cdaData[i][2],
+                            selected: true
+                        });
+                    }
+                }
+                return tempArr;
+            })();
+        return {
+            xAxis: xAxis,
+            series1: series,
+            series2: series2,
+            series3: series3
+        };
+    };
+
+    // option
+    function GetBarTypeOption22(XLegends, XDatas1, XDatas2, XDatas3) {
+        return {
+            //提示框组件
+            tooltip: {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'axis'
+            },
+            //图例组件。
+            legend: {
+                //图例的数据数组
+                data: ['2016', '2017', '2015']
+            },
+            //直角坐标系内绘图网格
+            grid: {
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '4%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top: '20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis: [
+                {
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type: 'category',
+                    //是否显示 x 轴。default: true
+                    show: true,
+                    //类目数据
+                    data: XLegends,
+                    //x坐标轴刻度标签的相关设置。
+                    axisLabel: {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval: 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 20,
+                        //刻度标签与轴线之间的距离。
+                        margin: 10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color: "#777",
+                        }
+                    },
+                    //x坐标轴轴线相关设置。
+                    axisLine: {
+                        //是否显示x坐标轴轴线。default: true
+                        show: true,
+                        interval: 0,
+                        //x坐标轴线线样式
+                        lineStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //x坐标轴在 grid 区域中的分隔线。
+                    splitLine: {
+                        //是否显示分隔线。
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系 grid 中的 y 轴
+            yAxis: [
+                {
+                    //坐标轴名称。
+                    name: "数量",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type: 'value',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel: {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter: function (value) {
+                            if (value !== 0) {
+                                return value;
+                            } else if (value === "") {
+                                return 0;
+                            } else {
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin: 10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //y坐标轴轴线相关设置。
+                    axisLine: {
+                        //是否显示x坐标轴轴线。default: true
+                        show: true,
+                        //y坐标轴线线样式
+                        lineStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //y坐标轴在 grid 区域中的分隔线。
+                    splitLine: {
+                        //是否显示分隔线。是否显示分隔线
+                        show: false
+                    }
+                }
+            ],
+            //系列列表
+            series: [
+                {
+                    //系列名称
+                    name: "2016",
+                    //组件类型
+                    type: 'bar',
+                    //图形样式
+                    itemStyle: {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color: "rgb(154, 188, 195)",
+                            // barBorderRadius: 10,
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+
+                        },
+                        normal: {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color: "#1885bd"
+                        },
+                    },
+                    //系列中的数据内容数组
+                    data: XDatas1
+                },
+                {
+                    //系列名称
+                    name: "2017",
+                    //组件类型
+                    type: 'bar',
+                    //图形样式
+                    itemStyle: {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color: "rgb(168, 227, 215)",
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+
+                        },
+                        normal: {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color: "#99ccff"
+                        }
+                    },
+                    //系列中的数据内容数组
+                    data: XDatas2
+                },
+                {
+                    //系列名称
+                    name: "2015",
+                    //组件类型
+                    type: 'bar',
+                    //图形样式
+                    itemStyle: {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color: "rgb(108, 207, 205)",
+                            // barBorderRadius: 10,
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        },
+                        normal: {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color: "#99d2dd"
+                        }
+                    },
+                    //系列中的数据内容数组
+                    data: XDatas2
+                }
+            ]
+        };
+    };
+
+    //C1-3 折线、柱形混合图
+    window.onload = initBarCharts3();//加载图表
+    function initBarCharts3() {
+        var lineTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/YZSY_1.cda&dataAccessId=C11_DS";
+        // lineTypeUrl+="&paramtimestart2=" + timestart2+ "&paramtimeend2=" + timeend2 + "&paramgetks2=" + getks2;
+        lineTypeUrl += "&paramtimestart2=" + "20180526" + "&paramtimeend2=" + "20180626" + "&paramgetks2=" + "ALL";
+        var lineTypeUrl1 = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/YZSY_1.cda&dataAccessId=C1_DS";
+        // lineTypeUrl1+="&paramtimestart2=" + timestart2+ "&paramtimeend2=" + timeend2 + "&paramgetks2=" + getks2;
+        lineTypeUrl1 += "&paramtimestart2=" + "20180526" + "&paramtimeend2=" + "20180626" + "&paramgetks2=" + "ALL";
+        // var lineTypeJSON = readJSONFile(lineTypeUrl).resultset;
+        // var lineTypeJSON1 = readJSONFile(lineTypeUrl1).resultset;
+        // var data = LineMixBarDataEncapsulation(lineTypeJSON, lineTypeJSON1);
+        var data = getData2();
+        chartDrew(GetLineMixBarTypeOption(data.xAxis, data.series, data.series2),  // option
+            echarts.init(document.getElementById("C1-3")) //chart
+        );
+    }
+
+    //封装数据
+    function LineMixBarDataEncapsulation(cdaData1, cdaData2) {
+        // line的X轴属性
+        var xAxis =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData1.length; i++) {
+                    tempArr.push({
+                        'name': cdaData1[i][0],
+                        selected: true
+                    });
+                    tempArr[i] = cdaData1[i][0];
+                }
+                return tempArr;
+            })();
+        //line的X轴1的值
+        var series =
+            (function () {
+                var tempArr1 = [];
+                for (var i = 0; i < cdaData1.length; i++) {
+                    tempArr1.push({
+                        'name': cdaData1[i][0],
+                        'value': cdaData1[i][1],
+                        selected: true
+                    });
+                }
+                return tempArr1;
+            })();
+        //line的X轴2的值
+        var series2 =
+            (function () {
+                var tempArr2 = [];
+                for (var i = 0; i < cdaData2.length; i++) {
+                    tempArr2.push({
+                        'name': cdaData2[i][0],
+                        'value': cdaData2[i][1],
+                        selected: true
+                    });
+                }
+                return tempArr2;
+            })();
+        return {
+            xAxis: xAxis,
+            series: series,
+            series2: series2
+        };
+    };
+
+    //option
+    function GetLineMixBarTypeOption(XLegends, XDatas1, XDatas2) {
+        return {
+            //提示框组件
+            tooltip: {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'axis',
+                //提示框浮层的背景颜色。
+                backgroundColor: '#fff',
+                //提示框浮层的边框颜色。
+                borderColor: 'grey',
+                //提示框浮层的文本样式。
+                textStyle: {
+                    color: 'grey'
+                }
+            },
+            //图例组件。
+            legend: {
+                //图例的数据数组
+                data: ['人次', '收入']
+            },
+            //直角坐标系内绘图网格
+            grid: {
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '1.5%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top: '20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis: [
+                {
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type: 'category',
+                    //是否显示 x 轴。default: true
+                    show: true,
+                    //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样。
+                    boundaryGap: true,
+                    //类目数据
+                    data: XLegends,
+                    //x坐标轴刻度标签的相关设置。
+                    axisLabel: {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval: 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 45,
+                        //刻度标签与轴线之间的距离。
+                        margin: 10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color: "#777",
+                            fontSize: 12
+                        }
+                    },
+                    //x坐标轴轴线相关设置。
+                    axisLine: {
+                        //是否显示x坐标轴轴线。default: true
+                        show: true,
+                        //x坐标轴线线样式
+                        lineStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick: {
+                        //是否显示坐标轴刻度。
+                        show: false
+                    },
+                    //x坐标轴在 grid 区域中的分隔线。
+                    splitLine: {
+                        //是否显示分隔线。是否显示分隔线
+                        show: false,
+                        //x坐标轴线线样式
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    }
+                }
+            ],
+            //直角坐标系 grid 中的 y 轴
+            yAxis: [
+                {
+                    //坐标轴名称。
+                    name: "人次",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type: 'value',
+                    //数据展示的小数精度。
+                    precision: 2,
+                    //是否是脱离 0 值比例。设置成 true 后坐标刻度不会强制包含零刻度。 default: false
+                    scale: true,
+                    //坐标轴刻度最小值。
+                    min: 0,
+                    //y 轴的位置。
+                    position: 'left',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel: {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter: function (value) {
+                            if (value !== 0) {
+                                return value;
+                            } else if (value === "") {
+                                return 0;
+                            } else {
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin: 10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //y坐标轴轴线相关设置。
+                    axisLine: {
+                        //是否显示x坐标轴轴线。default: true
+                        show: true,
+                        //y坐标轴线线样式
+                        lineStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick: {
+                        //是否显示坐标轴刻度。
+                        show: false
+                    },
+                    //y坐标轴在 grid 区域中的分隔线。
+                    splitLine: {
+                        //是否显示分隔线。
+                        show: false,
+                        //分隔线样式
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    },
+                },
+                {
+                    name: "收入",
+                    type: 'value',
+                    //坐标轴刻度最小值。
+                    min: 0,
+                    precision: 2,
+                    //是否是脱离 0 值比例。设置成 true 后坐标刻度不会强制包含零刻度。 default: false
+                    scale: true,
+                    position: 'right',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel: {
+                        formatter: function (value) {
+                            if (value !== 0) {
+                                return value;
+                            } else if (value === "") {
+                                return 0;
+                            } else {
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin: 10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick: {
+                        show: false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine: {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    },
+                }
+            ],
+            //系列列表
+            series: [
+                {
+                    //系列名称
+                    name: "收入",
+                    //组件
+                    type: 'line',
+                    //标记的图形。default: 'emptyCircle',
+                    //包括 'circle', 'rect', 'roundRect', 'triangle', 'diamond', 'pin', 'arrow'
+                    symbol: 'diamond',
+                    //标记的大小
+                    symbolSize: 5,
+                    //是否平滑曲线显示。default: false
+                    smooth: true,
+                    //使用的 y 轴的 index
+                    yAxisIndex: 1,
+                    //折线拐点标志的样式。
+                    itemStyle: {
+                        normal: {
+                            color: "#ff7f36",
+                        },
+                        //图形的高亮样式。
+                        emphasis: {
+                            color: "#ff7f36",
+                        }
+                    },
+                    ////系列中的数据内容数组
+                    data: XDatas1
+                },
+                {
+                    name: "人次",
+                    type: 'bar',
+                    //图标标记
+                    markPoint: {
+                        //标记的图形
+                        symbol: 'circle',//拐点样式
+                        //标记的大小
+                        symbolSize: 50,//拐点大小
+                    },
+                    //图形样式
+                    itemStyle: {
+                        normal: {
+                            color: "#1790cf ",//曲线颜色
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color: "#1790cf ",//曲线颜色
+                        }
+                    },
+                    data: XDatas2
+                }
+            ]
+        };
+    };
+
+    // C1-4 折线、柱形图混合堆叠-双轴~
+    window.onload = initBarCharts4();//加载图表
+    function initBarCharts4() {
+        var url = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=line1";
+        var url2 = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=line11";
+        var url3 = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=line111";
+        // url += "&parambutton_event=" + button_event + "&paramoutletParam=" + outletParam;
+        // var json = readJSONFile(url).resultset;
+        // var data = getBarDataTwo(readJSONFile(url).resultset, readJSONFile(url2).resultset, readJSONFile(url3).resultset);
+        var data = getData3();
+        chartDrew(getBarOptionTwo(data.xAxis, data.series, data.series2, data.series3),  // option
+            echarts.init(document.getElementById("C1-4")) //chart
+        );
+    }
+
+    // 封装数据
+    function getBarDataTwo(json, json2, json3) {
+        var xAxis =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < json.length; i++) {
+                    tempArr.push({'name': json[i][0], selected: true});
+                    tempArr[i] = json[i][0];
+                }
+                return tempArr;
+            })();
+        var series =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < json.length; i++) {
+                    tempArr.push({'name': json[i][0], 'value': json[i][1], selected: true});
+                }
+                return tempArr;
+            })();
+        var series2 =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < json2.length; i++) {
+                    tempArr.push({'name': json2[i][0], 'value': json2[i][1], selected: true});
+                }
+                return tempArr;
+            })();
+        var series3 =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < json3.length; i++) {
+                    tempArr.push({'name': json3[i][0], 'value': json3[i][1], selected: true});
+                }
+                return tempArr;
+            })();
+        return {xAxis: xAxis, series: series, series2: series2, series3: series3};
+    }
+
+    // option
+    function getBarOptionTwo(xAxis, series, series2, series3) {
+        return {
+            //提示框组件
+            tooltip: {
+                trigger: 'axis',
+                //提示框浮层的背景颜色。
+                backgroundColor: '#fff',
+                //提示框浮层的边框颜色。
+                borderColor: 'grey',
+                //提示框浮层的文本样式。
+                textStyle: {
+                    color: 'grey'
+                }
+            },
+            //图例组件。
+            legend: {
+                data: ['预约人次', '应诊人次', '应诊率'],
+                // y:'bottom'
+            },
+            //直角坐标系内绘图网格
+            grid: {
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '4%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top: '20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis: [
+                {
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type: 'category',
+                    show: true,
+                    //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样。
+                    boundaryGap: true,
+                    data: xAxis,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel: {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval: 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 40,
+                        //刻度标签与轴线之间的距离。
+                        margin: 5,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color: "#777",
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick: {
+                        show: false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine: {
+                        //是否显示x坐标轴轴线。default: true
+                        show: false,
+                        //x坐标轴线线样式
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    //坐标轴名称。
+                    name: "人次",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type: 'value',
+                    //数据展示的小数精度。
+                    precision: 2,
+                    //是否是脱离 0 值比例。设置成 true 后坐标刻度不会强制包含零刻度。 default: false
+                    scale: true,
+                    //y 轴的位置。
+                    position: 'left',
+                    //坐标轴刻度最小值。
+                    min: 0,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel: {
+                        //度标签的内容格式器，支持字符串模板和回调函数两种形式。
+                        formatter: function (value) {
+                            if (value !== 0) {
+                                return value;
+                            } else if (value === "") {
+                                return 0;
+                            } else {
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin: 10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick: {
+                        show: false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine: {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    },
+                    // splitArea: {show: true
+                    // ,backgroundColor: 'rgba(252, 252, 252, 0.2)'}
+                },
+                {
+                    //坐标轴名称。
+                    name: "应诊率",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type: 'value',
+                    //  precision: 2,
+                    // scale : true,
+                    //y 轴的位置。
+                    position: 'right',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel: {
+                        //度标签的内容格式器，支持字符串模板和回调函数两种形式。
+                        formatter: function (value) {
+                            if (value !== 0) {
+                                return value + '%';
+                            } else if (value === "") {
+                                return 0;
+                            } else {
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin: 10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick: {
+                        show: false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine: {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    },
+                }
+            ],
+            series: [
+                {
+                    name: "预约人次",
+                    type: 'bar',
+                    //柱条的宽度
+                    barWidth: 20,
+                    //使用的 y 轴的 index
+                    yAxisIndex: '0',
+                    //图形样式
+                    itemStyle: {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color: "rgb(154, 188, 195)",
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+
+                        },
+                        normal: {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color: "#1790cf"
+                        },
+
+                    },
+                    data: series
+                },
+                {
+                    name: "应诊人次",
+                    type: 'bar',
+                    //柱条的宽度
+                    barWidth: 20,
+                    //使用的 y 轴的 index
+                    yAxisIndex: '0',
+                    //图形样式
+                    itemStyle: {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color: "rgb(168, 227, 215)",
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+
+                        },
+                        normal: {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color: "#99d2dd"
+                        }
+                    },
+                    data: series2
+                },
+                {
+                    name: "应诊率",
+                    type: 'line',
+                    //标记的图形。default: 'emptyCircle',
+                    //包括 'circle', 'rect', 'roundRect', 'triangle', 'diamond', 'pin', 'arrow'
+                    symbol: 'circle',//拐点样式
+                    //标记大小
+                    symbolSize: 5,//拐点大小
+                    //是否平滑曲线显示。default: false
+                    smooth: true,
+                    //使用的 y 轴的 index
+                    yAxisIndex: '1',
+                    //折线拐点标志的样式。
+                    itemStyle: {
+                        normal: {
+                            color: "#33CC66",//曲线颜色
+                        },
+                        //图形的高亮样式。
+                        emphasis: {
+                            color: "rgb(100, 133, 155)",
+                            label: {
+                                show: true
+                            }
+                        }
+                    },
+                    data: series3
+                }
+
+
+            ]
+        };
+    }
+
+    //C1-5 堆叠条形码
+    window.onload = initBarCharts5();
+
+    function initBarCharts5() {
+        var outletUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=bar_ds30";
+        //   outletUrl += "&paramtimestart=" + timestart +"&paramtimeend=" + timeend ;
+        outletUrl += "&paramtimestart=" + "20180626" + "&paramtimeend=" + "20180626";
+        //+"&paramgetks=" + getks;
+
+        // var outletJSON = readJSONFile(outletUrl).resultset;
+        // var data = BarDataEncapsulation2(outletJSON);
+        var data = getData2();
+        chartDrew(GetOutletOption2(data.xAxis, data.series, data.series2),  // option
+            echarts.init(document.getElementById("C1-5")) //chart
+        );
+    }
+
+    // 封装数据
+    function BarDataEncapsulation2(cdaData) {
+        // 柱状图的X轴属性
+        var xAxis =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length; i++) {
+                    tempArr[i] = cdaData[i][0];
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴1的值（欠费）
+        var series =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length; i++) {
+                    //   cdaData[i][1]=cdaData[i][1].substring(0,cdaData[i][1].lastIndexOf('%'));
+                    tempArr.push({
+                        'name': cdaData[i][0],
+                        'value': cdaData[i][1],
+                        selected: true
+                    });
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴2的值（未欠费）
+        var series2 =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length; i++) {
+                    tempArr.push({
+                        'name': cdaData[i][0],
+                        'value': cdaData[i][2],
+                        selected: true
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            xAxis: xAxis,
+            series: series,
+            series2: series2
+        };
+    };
+
+    // option
+    function GetOutletOption2(XLegends, XDatas1, XDatas2) {
+        return {
+            //提示框组件
+            tooltip: {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'axis',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter: function (params) {
+                    return params[0].name + '<br/>'
+                        + params[1].seriesName + ' : ' + params[1].value + '<br/>'
+                        + params[0].seriesName + ' : ' + params[0].value;
+                }
+            },
+            //图例组件。
+            legend: {
+                data: ['2016', '2017']
+            },
+            yAxis: [
+                {
+                    name: "类型",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation: "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type: 'category',
+                    show: true,
+                    //data : SecondBarDataEncapsulation.getLegends(),
+                    data: XLegends,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel: {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval: 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 30,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color: "#777",
+                            fontSize: 10
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine: {
+                        show: true,
+
+                        lineStyle: {
+                            color: "#777"
+                        },
+                        color: "#007AC7"
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine: {
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系内绘图网格
+            grid: {
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '8%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top: '20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis: [
+                {
+                    name: "金额",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation: "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type: 'value',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel: {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter: '{value}',
+                        //刻度标签与轴线之间的距离。
+                        margin: 10,
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval: 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 30,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine: {
+                        interval: 0,
+                        show: true,
+                        lineStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine: {
+                        show: false
+                    }
+                }
+            ],
+            //系列列表。
+            series: [
+                {
+                    name: "2016",
+                    type: 'bar',
+                    //数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+                    stack: '总量',
+                    //图形样式
+                    itemStyle: {
+                        normal: {
+                            // color : "rgba(182, 162, 222)",
+                            color: "#1790cf",//曲线颜色
+                            label: {
+                                show: true,
+                                position: 'insideTop',
+                                textStyle: {
+                                    color: "white"
+                                }
+                            },
+                            //圆角半径
+                            barBorderRadius: 0,
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color: "#99CCFF",//曲线颜色
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        },
+
+                    },
+                    data: XDatas2
+                },
+                {
+                    name: "2017",
+                    type: 'bar',
+                    //数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+                    stack: '总量',
+                    //图形样式
+                    itemStyle: {
+                        normal: {
+                            color: "#99d2dd",
+                            label: {
+                                show: true,
+                                position: 'insideTop',
+                                textStyle: {
+                                    color: "black"
+                                }
+                            },
+                            //圆角半径
+                            barBorderRadius: 0,
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color: 'rgba(159, 135, 208, 0.57)',
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        }
+                    },
+                    data: XDatas1
+                }
+            ]
+        };
+    };
+
+    //C1-6 堆叠柱形图
+    window.onload = initBarCharts6();
+
+    function initBarCharts6() {
+        var outletUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/ZYQFZE.cda&dataAccessId=zyqfmx_qfrc_bar_ds";
+        // outletUrl += "&paramtimestart=" + timestart +"&paramtimeend=" + timeend  +"&paramgetks=" + getks;
+        // var outletJSON = readJSONFile(outletUrl).resultset;
+        // var data = BarDataEncapsulation(outletJSON);
+        var data = getData2();
+        chartDrew(GetOutletOption(data.xAxis, data.series, data.series2),  // option
+            echarts.init(document.getElementById("C1-6")) //chart
+        );
+    }
+
+    // 封装数据
+    function BarDataEncapsulation(cdaData) {
+        // 柱状图的X轴属性
+        var xAxis =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length; i++) {
+                    tempArr[i] = cdaData[i][0];
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴1的值（欠费）
+        var series =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length; i++) {
+                    //   cdaData[i][1]=cdaData[i][1].substring(0,cdaData[i][1].lastIndexOf('%'));
+                    tempArr.push({
+                        'name': cdaData[i][0],
+                        'value': cdaData[i][1],
+                        selected: true
+                    });
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴2的值（未欠费）
+        var series2 =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length; i++) {
+                    //     cdaData[i][2]=cdaData[i][2].substring(0,cdaData[i][2].lastIndexOf('%'));
+                    //alert(cdaData[i][2]);
+                    tempArr.push({
+                        'name': cdaData[i][0],
+                        'value': cdaData[i][2],
+                        selected: true
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            xAxis: xAxis,
+            series: series,
+            series2: series2
+        };
+    };
+
+    // option
+    function GetOutletOption(XLegends, XDatas1, XDatas2) {
+        return {
+            //提示框组件
+            tooltip: {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'axis',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter: function (params) {
+                    return params[0].name + '<br/>'
+                        + params[1].seriesName + ' : ' + params[1].value + '%<br/>'
+                        + params[0].seriesName + ' : ' + params[0].value + '%';
+                }
+            },
+            //图例组件。
+            legend: {
+                data: ['欠费占比', '未欠费占比']
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis: [
+                {
+                    name: "科室病区",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation: "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type: 'category',
+                    show: true,
+                    data: XLegends,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel: {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval: 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 25,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color: "#777",
+                            fontSize: 10
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine: {
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系内绘图网格
+            grid: {
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '8.5%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top: '20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+
+            },
+            yAxis: [
+                {
+                    name: "金额占比",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation: "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type: 'value',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel: {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter: '{value}%',
+                        //刻度标签与轴线之间的距离。
+                        margin: 10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color: "#777"
+                        }
+                    },
+
+                    //坐标轴轴线相关设置。
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: "#777"
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine: {
+                        show: false
+                    }
+                }
+            ],
+            series: [
+                {
+                    name: "未欠费占比",
+                    type: 'bar',
+                    //数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+                    stack: '总量',
+                    //柱条的宽度
+                    barWidth: 60,
+                    itemStyle: {
+                        normal: {
+                            color: "#1790cf",//曲线颜色
+                            label: {
+                                show: true,
+                                position: 'insideTop',
+                                textStyle: {
+                                    color: "white"
+                                }
+                            },
+                            barBorderRadius: 0,
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color: "#1790cf",//曲线颜色
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        },
+
+                    },
+                    data: XDatas2
+                },
+                {
+                    name: "欠费占比",
+                    type: 'bar',
+                    //数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+                    stack: '总量',
+                    //柱条的宽度
+                    barWith: 60,
+                    itemStyle: {
+                        normal: {
+                            color: '#99d2dd',
+                            label: {
+                                show: true,
+                                position: 'top',
+                                textStyle: {
+                                    color: "black"
+                                }
+                            },
+                            //圆角半径
+                            barBorderRadius: 0,
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color: '#99d2dd',
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        }
+                    },
+                    data: XDatas1
+                }
+            ]
+        };
+    };
+
+    //C1-7
+    window.onload = initBarCharts7();
+
+    function initBarCharts7() {
+        var dataValue = getBarData1();
+        var option = GetBarTypeOption1(dataValue.xAxisData, dataValue.seriesData1, dataValue.seriesData2);
+        var dom = document.getElementById("C1-7");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getBarData1() {
+        var xAxisData = ['东沙湖所', '湖东所', '湖西所', '娄葑所', '胜浦所', '唯亭所', '斜塘所', '半岛所', '永安桥所', '综保所'];
+        var seriesData1 = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        var seriesData2 = [100, 290, 310, 170, 120, 150, 140, 230, 220, 110];
+        return {xAxisData: xAxisData, seriesData1: seriesData1, seriesData2: seriesData2};
+    }
+
+    function GetBarTypeOption1(xAxisData, seriesData1, seriesData2) {
+        return {
+            //  "backgroundColor":"#0C3053",
+            grid: {
+                left: '3%',
+                right: '5%',
+                top: '5%',
+                bottom: '5%',
+                containLabel: true
+            },
+            xAxis: [{
+                type: 'category',
+                data: xAxisData,
+                axisLine: {
+                    show: false,
+                    lineStyle: {
+                        color: "#063374",
+                        width: 1,
+                        type: "solid"
+                    }
+                },
+                axisTick: {
+                    show: false
+                },
+                axisLabel: {
+                    show: true,
+                    textStyle: {
+                        color: '#777'
+                        // color: "#00c7ff",
+                    },
+                    rotate: 30,
+                },
+            }],
+            yAxis: [{
+                show: false,
+                type: 'value',
+                // axisLabel: {
+                //     formatter: '{value} %'
+                // },
+                axisLine: {
+                    show: false,
+                    lineStyle: {
+                        color: "#00c7ff",
+                        width: 1,
+                        type: "solid"
+                    },
+                },
+                axisTick: {
+                    show: false
+                },
+                splitLine: {
+                    show: false,
+                    lineStyle: {
+                        color: "#063374",
+                    }
+                }
+            }],
+            series: [{
+                "type": "bar",
+                "barWidth": "40%",
+                //数据堆叠
+                "stack": "b",
+                //是否启用图例 hover 时的联动高亮。
+                "legendHoverLink": false,
+                "itemStyle": {
+                    "normal": {
+                        "color": "rgba(0,0,0,0)"
+                    }
+                },
+                "data": seriesData1
+            },
+
+                {
+                    "type": "bar",
+                    "barWidth": "30%",
+                    "stack": "b",
+                    "label": {
+                        "normal": {
+                            "show": true,
+                            position: 'top',
+                            //   "position": ["200","0"],
+                            //  "offset": [100, 0],
+                            "textStyle": {
+                                "fontSize": 12,
+                                "color": "#777"
+                            },
+                            "formatter": "{c}"
+                        }
+                    },
+                    "legendHoverLink": false,
+                    "silent": true,
+                    itemStyle: {
+                        normal: {
+                            barBorderRadius: 30,
+                            color: new echarts.graphic.LinearGradient(
+                                0, 1, 0, 0, [{
+                                    offset: 0,
+                                    color: '#AEDDBA'
+                                },
+                                    {
+                                        offset: 1,
+                                        color: '#00c0e9'
+                                    }
+                                ]
+                            )
+
+                        }
+                    },
+                    "data": seriesData2
+                },
+
+
+            ]
+        };
+    }
+
+    //C1-8
+    window.onload = initBarCharts8();
+
+    function initBarCharts8() {
+        var dataValue = getBarData2();
+        var option = GetBarTypeOption2(dataValue.legendData, dataValue.seriesData1, dataValue.seriesData2, dataValue.seriesData3, dataValue.seriesData4, dataValue.seriesData5, dataValue.seriesData6);
+        var dom = document.getElementById("C1-8");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getBarData2() {
+        var legendData = ['东沙湖所', '湖东所', '湖西所', '娄葑所', '胜浦所', '唯亭所', '斜塘所', '半岛所', '永安桥所', '综保所'];
+        var seriesData1 = [750, 832, 901, 934, 1290, 1330, 1320, 820, 832, 901];
+        var seriesData2 = [150, 302, 301, 334, 390, 330, 320, 320, 302, 301];
+        var seriesData3 = [150, 132, 101, 134, 90, 230, 210, 120, 132, 101];
+        var seriesData4 = [150, 182, 191, 234, 290, 330, 310, 220, 182, 191];
+        var seriesData5 = [150, 212, 201, 154, 190, 330, 410, 150, 212, 201];
+        var seriesData6 = [150, 832, 901, 934, 1290, 1330, 1320, 820, 832, 901];
+        return {
+            legendData: legendData,
+            seriesData1: seriesData1,
+            seriesData2: seriesData2,
+            seriesData3: seriesData3,
+            seriesData4: seriesData4,
+            seriesData5: seriesData5,
+            seriesData6: seriesData6
+        }
+    }
+
+    function GetBarTypeOption2(legendData, seriesData1, seriesData2, seriesData3, seriesData4, seriesData5, seriesData6) {
+        return {
+            // backgroundColor:'#0C3053',
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                    type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                }
+            },
+            // color: ['#047eca','#4BB3D4','#3b64a6','#0d9abb','#00c0e9','#0284FF','#5d3ec5'],
+            color: [
+
+                '#e38980',
+                '#f7db88',
+                '#7777eb',
+                '#00e9db',
+                '#00c0e9',
+                '#70ffac',
+                '#85b6b2',
+                '#cd5e7e',
+                '#e38980',
+                '#f7db88'
+            ],
+            legend: {
+                data: legendData
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            yAxis: {
+                splitLine: false,
+                type: 'value',
+                axisLine: {
+
+                    lineStyle: {
+                        color: '#777'
+                    }
+                },
+                axisLabel: {
+                    color: '#777',
+                    interval: 0,
+                    fontSize: 12,
+
+                }
+            },
+            xAxis: {
+                type: 'category',
+                axisLine: {
+                    lineStyle: {
+                        color: '#777'
+                    }
+                },
+                axisLabel: {
+                    color: '#777',
+                    interval: 0,
+                    fontSize: 12,
+                    rotate: 30,
+
+                },
+
+                data: legendData
+            },
+            series: [
+
+                {
+                    name: '车库总量',
+                    type: 'line',
+                    show: true,
+                    stack: 'sum',
+                    itemStyle: {
+                        normal: {
+                            shadowBlur: 5,
+                            shadowColor: 'white'
+                        }
+                    },
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'insideRight'
+                        }
+                    },
+                    data: seriesData1
+                },
+                {
+                    barWidth: '40%',
+                    name: '经营',
+                    type: 'bar',
+                    stack: '总量',
+                    itemStyle: {
+                        normal: {
+                            shadowBlur: 5,
+                            // shadowColor: 'white'
+                            barBorderRadius: 2,
+                        }
+                    },
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'insideRight'
+                        }
+                    },
+                    data: seriesData2
+                },
+                {
+                    name: '仓库',
+                    type: 'bar',
+                    stack: '总量',
+                    itemStyle: {
+                        normal: {
+                            shadowBlur: 5,
+                            // shadowColor: 'white'
+                            barBorderRadius: 2,
+                        }
+                    },
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'insideRight'
+                        }
+                    },
+                    data: seriesData3
+                },
+                {
+                    name: '空关',
+                    type: 'bar',
+                    stack: '总量',
+                    itemStyle: {
+                        normal: {
+                            shadowBlur: 5,
+                            //   shadowColor: 'white'
+                            barBorderRadius: 2,
+                        }
+                    },
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'insideRight'
+                        }
+                    },
+                    data: seriesData4
+                },
+                {
+                    name: '自住',
+                    type: 'bar',
+                    stack: '总量',
+                    itemStyle: {
+                        normal: {
+                            shadowBlur: 5,
+                            //    shadowColor: 'white'
+                            barBorderRadius: 2,
+                        }
+                    },
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'insideRight'
+                        }
+                    },
+                    data: seriesData5
+                },
+                {
+                    name: '租住',
+                    type: 'bar',
+                    stack: '总量',
+                    itemStyle: {
+                        normal: {
+                            shadowBlur: 5,
+                            //   shadowColor: 'white'
+                            barBorderRadius: 2,
+                        }
+                    },
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'insideRight'
+                        }
+                    },
+                    data: seriesData6
+                }
+
+            ]
+        };
+    }
+
+    //C1-9
+    window.onload = initBarCharts9();
+
+    function initBarCharts9() {
+        var dataValue = getBarData3();
+        var option = GetBarTypeOption3(dataValue.xAxisData, dataValue.seriesData1, dataValue.seriesData2);
+        var dom = document.getElementById("C1-9");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getBarData3() {
+        var xAxisData = ['东沙湖所', '湖东所', '湖西所', '娄葑所', '胜浦所', '唯亭所', '斜塘所', '半岛所', '永安桥所', '综保所'];
+        var seriesData1 = [2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162, 32.6, 20.0];
+        var seriesData2 = [2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8];
+        return {xAxisData: xAxisData, seriesData1: seriesData1, seriesData2: seriesData2};
+    }
+
+    function GetBarTypeOption3(xAxisData, seriesData1, seriesData2) {
+        return {
+            // "backgroundColor":"#0C3053",
+            // color: colorList,
+            legend: {
+                data: ['工地流动人口', '流动人口'],
+                textStyle: {
+                    color: '#777',
+                },
+                orient: 'vertical',
+                left: '3%',
+            },
+
+            calculable: true,
+            grid: {
+                left: '3%',
+                right: '4%',
+                top: '8%',
+                bottom: '5%',
+                containLabel: true
+            },
+            yAxis: {
+                show: false,
+                splitLine: false,
+                type: 'value',
+                axisLine: {
+                    show: false,
+                    lineStyle: {
+                        color: '#0177d4'
+                    }
+                },
+
+            },
+            xAxis: {
+                type: 'category',
+                axisLine: {
+                    lineStyle: {
+                        color: '#0177d4'
+                    }
+                },
+                axisLabel: {
+                    color: '#777',
+                    interval: 0,
+                    fontSize: 12,
+                    rotate: 30,
+
+                },
+                data: xAxisData
+            },
+            series: [
+                {
+                    name: '工地流动人口',
+                    type: 'bar',
+
+                    itemStyle: {
+                        normal: {
+                            barBorderRadius: 10,
+                            //  barBorderRadius: [0, 0, 0, 0],
+                            color: new echarts.graphic.LinearGradient(
+                                0, 0, 0, 1, [{
+                                    offset: 0,
+                                    color: '#027eff'
+                                },
+
+                                    {
+                                        offset: 1,
+
+                                        color: '#00feff'
+                                    }
+                                ]
+                            )
+                        }
+                    },
+                    data: seriesData1,
+                    markPoint: {
+                        label: {show: true, color: '#0177d4'},
+                        data: [
+                            {type: 'max', name: '最大值'},
+                            {type: 'min', name: '最小值'}
+                        ]
+                    },
+                    markLine: {
+                        label: {show: true, color: '#0177d4'},
+                        data: [
+                            {type: 'average', name: '平均值'}
+                        ]
+                    }
+                },
+                {
+                    name: '流动人口',
+                    type: 'bar',
+                    itemStyle: {
+                        normal: {
+                            barBorderRadius: 10,
+                            //barBorderRadius: [0, 0, 0, 0],
+                            color:
+                            // '#F0E68C',
+                                new echarts.graphic.LinearGradient(
+                                    0, 0, 0, 1, [{
+                                        offset: 0,
+                                        // color: '#00E9DB'
+                                        color: '#F0E68C'
+                                    },
+                                        {
+                                            offset: 1,
+                                            color: '#ffffff'
+                                        }
+                                    ]
+                                )
+                        }
+                    },
+                    data: seriesData2,
+                    markPoint: {
+                        label: {show: true, color: '#027eff'},
+                        data: [
+                            {name: '最高', value: 182, xAxis: 7, yAxis: 183},
+                            {name: '最低', value: 2, xAxis: 11, yAxis: 3}
+                        ]
+                    },
+                    markLine: {
+                        label: {show: true, color: '#0177d4'},
+                        data: [
+                            {type: 'average', name: '平均值'}
+                        ]
+                    }
+                }
+            ]
+        };
+    }
+
+    //C1-10
+    window.onload = initBarCharts10();
+
+    function initBarCharts10() {
+        var dataValue = getBarData4();
+        var option = GetBarTypeOption4(dataValue.xAxisData, dataValue.seriesData1, dataValue.seriesData2);
+        var dom = document.getElementById("C1-10");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getBarData4() {
+        var xAxisData = ['第二人民医院', '人民医院', '中联基层', '东沟卫生院', '中联公卫', '计划免疫', '疾控中心', '妇幼保健', '中联电子病历', '中医院'];
+        var seriesData1 = [100, 98, 95, 90, 85, 80, 76, 70, 65, 60];
+        var seriesData2 = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100];
+        return {xAxisData: xAxisData, seriesData1: seriesData1, seriesData2: seriesData2};
+    }
+
+    function GetBarTypeOption4(xAxisData, seriesData1, seriesData2) {
+        return {
+            // backgroundColor: '#011c3a',
+            //      "title": {
+            //   "text": "上传进度排名",
+            //   "left": "center",
+            //   "y": "10",
+            //   "textStyle": {
+            //     "color": "#fff",
+            //     fontSize:'20px',
+            //
+            //   }
+            // },
+            xAxis: {
+                data: xAxisData,
+                axisLine: {
+                    lineStyle: {
+                        color: '#0177d4'
+                    }
+                },
+                axisLabel: {
+                    color: '#777',
+                    interval: 0,
+                    fontSize: 8,
+                    rotate: 30,
+
+                }
+            },
+            yAxis: {
+                show: false,
+                name: "",
+                nameTextStyle: {
+                    color: '#fff',
+                    fontSize: 12
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#0177d4'
+                    }
+                },
+                axisLabel: {
+                    color: '#fff',
+                    fontSize: 12
+                },
+                splitLine: {
+                    show: false,
+                    lineStyle: {
+                        color: '#0177d4'
+                    }
+                },
+                // interval:500,
+                //    max:5000
+
+            },
+            grid: {
+                //left: '0%',
+                //right: '0%',
+                //bottom: '15%',
+                top: '20%',
+                //height: '85%',
+                containLabel: true,
+                z: 22
+            },
+            series: [{
+                type: 'bar',
+                barWidth: '50%',
+                xAxisIndex: 0,
+                yAxisIndex: 0,
+                itemStyle: {
+                    normal: {
+                        barBorderRadius: [0, 0, 0, 0],
+                        color: new echarts.graphic.LinearGradient(
+                            0, 0, 0, 1, [{
+                                offset: 0,
+                                color: '#00feff'
+                            },
+
+                                {
+                                    offset: 1,
+                                    color: '#027eff'
+                                }
+                            ]
+                        )
+                    }
+                },
+                data: seriesData1,
+                zlevel: 11
+
+            },
+                {
+                    name: '',
+                    type: 'bar',
+                    barWidth: '50%',
+                    xAxisIndex: 0,
+                    yAxisIndex: 0,
+                    //不同系列的柱间距离,'-100%': 用柱子做背景
+                    barGap: '-100%',
+                    data: seriesData2,
+                    itemStyle: {
+                        normal: {
+                            color: '#9E9E9E'//rgba(255,255,255,0.1)
+                        }
+                    },
+                    zlevel: 9
+                },
+
+            ]
+        }
+    }
+
+    //C1-11
+    window.onload = initBarCharts11();
+
+    function initBarCharts11() {
+        var dataValue = getBarData5();
+        var option = GetBarTypeOption5(dataValue.yAxisData, dataValue.seriesData1, dataValue.seriesData2);
+        var dom = document.getElementById("C1-11");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getBarData5() {
+        var yAxisData = ['东沙湖所', '湖东所', '湖西所', '娄葑所', '胜浦所', '唯亭所', '斜塘所', '半岛所', '永安桥所', '综保所'];
+        var seriesData1 = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        var seriesData2 = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+        return {yAxisData: yAxisData, seriesData1: seriesData1, seriesData2: seriesData2};
+    }
+
+    function GetBarTypeOption5(yAxisData, seriesData1, seriesData2) {
+        return {
+            // "backgroundColor":"#0C3053",
+            "grid": {
+                "left": "5%",
+                "right": "10%",
+                "top": "5%",
+                "bottom": "3%",
+                "containLabel": true
+            },
+            "xAxis": {
+                "type": "value",
+                "max": [120],
+                "splitLine": {
+                    "show": false
+                },
+                "axisLine": {
+                    "show": false
+                },
+                "axisLabel": {
+                    "show": false
+                },
+                "axisTick": {
+                    "show": false
+                },
+            },
+            "yAxis": {
+                "type": "category",
+                "inverse": false,
+                "data": [],
+                "axisLine": {
+                    "show": false
+                },
+                "axisTick": {
+                    "show": false
+                },
+                "axisLabel": {
+                    "show": true,
+                    "textStyle": {
+                        "fontSize": 12,
+                        "color": "#777"
+                    }
+                },
+                data: yAxisData
+            },
+            "series": [{
+                "type": "bar",
+                "barWidth": "40%",
+                "stack": "b",
+                //是否启用图例 hover 时的联动高亮。
+                "legendHoverLink": false,
+                "itemStyle": {
+                    "normal": {
+                        "color": "rgba(0,0,0,0)"
+                    }
+                },
+                "data": seriesData1
+            }, {
+                "type": "bar",
+                "barWidth": "30%",
+                "stack": "b",
+                "label": {
+                    "normal": {
+                        "show": true,
+                        position: 'right',
+                        //   "position": ["200","0"],
+                        //  "offset": [100, 0],
+                        "textStyle": {
+                            "fontSize": 12,
+                            "color": "#777"
+                        },
+                        "formatter": "{c}"
+                    }
+                },
+                "legendHoverLink": false,
+                "silent": true,
+                itemStyle: {
+                    normal: {
+                        barBorderRadius: 30,
+                        color: new echarts.graphic.LinearGradient(
+                            0, 0, 1, 0, [{
+                                offset: 0,
+                                color: '#AEDDBA'
+                            },
+                                {
+                                    offset: 1,
+                                    color: '#00c0e9'
+                                }
+                            ]
+                        )
+                    }
+                },
+                "data": seriesData2
+            },
+            ]
+        };
+    }
+
+
+    //C1-12
+    window.onload = initBarCharts12();
+    function initBarCharts12() {
+        var dataValue = getBarData12();
+        var option = GetBarTypeOption12(dataValue.xAxisData, dataValue.seriesData1, dataValue.seriesData2);
+        var dom = document.getElementById("C1-12");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getBarData12() {
+        var xAxisData = ['东沙湖所', '湖东所', '湖西所', '娄葑所', '胜浦所', '唯亭所', '斜塘所', '半岛所', '永安桥所', '综保所'];
+        var seriesData1 = [1000, 1008, 2105, 2900, 3085, 3090, 6760, 7770, 8650, 9060];
+        var seriesData2 = [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000];
+        return {xAxisData: xAxisData, seriesData1: seriesData1, seriesData2: seriesData2};
+    }
+
+    function GetBarTypeOption12(xAxisData, seriesData1, seriesData2) {
+        return {
+            // backgroundColor: '#011c3a',
+            //      "title": {
+            //   "text": "上传进度排名",
+            //   "left": "center",
+            //   "y": "10",
+            //   "textStyle": {
+            //     "color": "#fff",
+            //     fontSize:'20px',
+            //
+            //   }
+            // },
+            yAxis: {
+                data: xAxisData,
+                axisLine: {
+                    lineStyle: {
+                        color: '#0177d4'
+                    }
+                },
+                axisLabel: {
+                    color: '#9E9E9E',
+                    interval: 0,
+                    fontSize: 8,
+                    margin:42
+                    // rotate: 30,
+
+                }
+            },
+            xAxis: {
+                show: false,
+                name: "",
+                nameTextStyle: {
+                    color: '#fff',
+                    fontSize: 12
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#0177d4'
+                    }
+                },
+                axisLabel: {
+                    color: '#fff',
+                    fontSize: 12
+                },
+                splitLine: {
+                    show: false,
+                    lineStyle: {
+                        color: '#0177d4'
+                    }
+                },
+                // interval:500,
+                //    max:5000
+
+            },
+            grid: {
+                //left: '0%',
+                //right: '0%',
+                bottom: '5%',
+                top: '5%',
+                //height: '85%',
+                containLabel: true,
+                z: 22
+            },
+            series: [{
+                type: 'bar',
+                barWidth: '50%',
+                label: {
+                    "normal": {
+                        "show": true,
+                        position: 'left',
+                        //   "position": ["200","0"],
+                        //  "offset": [100, 0],
+                        "textStyle": {
+                            "fontSize": 12,
+                            "color": "#9E9E9E"
+                        },
+                        "formatter": "{c}"
+                    }
+                },
+                xAxisIndex: 0,
+                yAxisIndex: 0,
+                itemStyle: {
+                    normal: {
+                        color: function (params){
+                            var colorList = ['red','yellow','green','rgb(164,205,238)','rgb(42,170,227)','rgb(25,46,94)','rgb(195,229,235)','red','yellow','green','red','yellow','green'];
+                            return colorList[params.dataIndex];
+                        }
+
+                    }
+                },
+                data: seriesData1,
+                zlevel: 11
+
+            },
+                {
+                    name: '',
+                    type: 'bar',
+                    barWidth: '50%',
+                    xAxisIndex: 0,
+                    yAxisIndex: 0,
+                    //不同系列的柱间距离,'-100%': 用柱子做背景
+                    barGap: '-100%',
+                    data: seriesData2,
+                    itemStyle: {
+                        normal: {
+                            color: '#9E9E9E'//rgba(255,255,255,0.1)
+                        }
+                    },
+                    zlevel: 9
+                },
+
+            ]
+        }
+    }
+
+
+    window.onload = initBarCharts13();
+    function initBarCharts13() {
+        var option = GetBarTypeOption13();
+        var dom = document.getElementById("C1-13");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+    
+    function GetBarTypeOption13() {
+        var xData = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+        var lineData = [100, 100, 100, 100, 100, 100, 100]
+        var lastYearData = [3, 20, 62, 34, 55, 65, 33];
+        var thisYearData = [11, 38, 23, 39, 66, 66, 79];
+        var timeLineData = [1];
+        let legend=['2017', '2018'];
+        var background = "#0e2147"; //背景
+        let textColor = "#fff";
+        let lineColor="rgba(255,255,255,0.2)";
+        let colors = [{
+            borderColor: "rgba(227,161,96,1)",
+            start: "rgba(227,161,96,0.8)",
+            end: "rgba(227,161,96,0.3)"
+        },
+            {
+                borderColor: "rgba(0,222,255,1)",
+                start: "rgba(0,222,255,0.3)",
+                end: "rgba(0,222,255,0.8)"
+            },
+        ];
+        let borderData = [];
+        let scale = 2;
+        borderData = xData.map(item => {
+            return scale;
+        });
+        return {
+            backgroundColor: background,
+            timeline: {
+                show: false,
+                top: 0,
+                data: []
+            },
+            legend: {
+                top: '5%',
+                right: '5%',
+                itemWidth: 20,
+                itemHeight: 5,
+                // itemGap: 343,
+                icon: 'horizontal',
+                textStyle: {
+                    color: '#ffffff',
+                    fontSize: 20,
+                },
+                data: legend
+            },
+            grid: [{
+                show: false,
+                left: '5%',
+                top: '10%',
+                bottom: '8%',
+                containLabel: true,
+                width: '37%'
+            }, {
+                show: false,
+                left: '51%',
+                top: '10%',
+                bottom: '8%',
+                width: '0%'
+            }, {
+                show: false,
+                right: '2%',
+                top: '10%',
+                bottom: '8%',
+                containLabel: true,
+                width: '37%'
+            }],
+            xAxis: [{
+                type: 'value',
+                inverse: true,
+                axisLine: {
+                    show: false
+                },
+                axisTick: {
+                    show: false
+                },
+                position: 'top',
+                axisLabel: {
+                    show: true,
+                    color: textColor
+                },
+                splitLine: {
+                    show: true,
+                    lineStyle: {
+                        color: lineColor
+                    }
+                },
+            }, {
+                gridIndex: 1,
+                show: false
+            }, {
+                gridIndex: 2,
+                axisLine: {
+                    show: false
+                },
+                axisTick: {
+                    show: false
+                },
+                position: 'top',
+                axisLabel: {
+                    show: true,
+                    color: textColor
+                },
+                splitLine: {
+                    show: true,
+                    lineStyle: {
+                        color: lineColor
+                    }
+                },
+            }],
+            yAxis: [{
+                type: 'category',
+                inverse: true,
+                position: 'right',
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: lineColor
+                    }
+                },
+
+                axisTick: {
+                    show: false
+                },
+                axisLabel: {
+                    show: false
+                },
+                data: xData
+            }, {
+                gridIndex: 1,
+                type: 'category',
+                inverse: true,
+                position: 'left',
+                axisLine: {
+                    show: false
+                },
+                axisTick: {
+                    show: false
+                },
+                axisLabel: {
+                    show: true,
+                    padding: [30, 0, 0, 0],
+                    textStyle: {
+                        color: '#ffffff',
+                        fontSize: 20
+                    },
+                    align: "center"
+
+                },
+                data: xData.map(function (value) {
+                    return {
+                        value: value,
+                        textStyle: {
+                            align: 'center'
+                        }
+                    }
+                })
+            }, {
+                gridIndex: 2,
+                type: 'category',
+                inverse: true,
+                position: 'left',
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: lineColor
+                    }
+                },
+                axisTick: {
+                    show: false
+                },
+                axisLabel: {
+                    show: false
+
+                },
+                data: xData
+            }],
+            series: [{
+                name: "2017",
+                type: "bar",
+                barWidth: 25,
+                stack: "1",
+                itemStyle: {
+                    normal: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                            offset: 0,
+                            color: colors[0].start
+                        },
+                            {
+                                offset: 1,
+                                color: colors[0].end
+                            }
+                        ]),
+                    }
+                },
+                label: {
+                    normal: {
+                        show: false,
+                    }
+                },
+                data: lastYearData,
+                animationEasing: "elasticOut"
+            },
+                {
+                    name: "2017",
+                    type: "bar",
+                    barWidth: 25,
+                    stack: "1",
+                    itemStyle: {
+                        normal: {
+                            color: colors[0].borderColor
+
+                        }
+                    },
+                    data: borderData
+                },
+                {
+                    name: "2018",
+                    type: "bar",
+                    stack: "2",
+                    barWidth: 25,
+                    xAxisIndex: 2,
+                    yAxisIndex: 2,
+                    itemStyle: {
+                        normal: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                                offset: 0,
+                                color: colors[1].start
+                            },
+                                {
+                                    offset: 1,
+                                    color: colors[1].end
+                                }
+                            ]),
+                        }
+                    },
+                    label: {
+                        normal: {
+                            show: false,
+                        }
+                    },
+                    data: thisYearData,
+                    animationEasing: "elasticOut"
+                },
+                {
+                    name: "2018",
+                    type: "bar",
+                    xAxisIndex: 2,
+                    yAxisIndex: 2,
+                    barWidth: 25,
+                    stack: "2",
+                    itemStyle: {
+                        normal: {
+                            color: colors[1].borderColor
+
+                        }
+                    },
+                    data: borderData
+                },
+            ]
+        }
+    }
+
+    <!-- 柱状 end-->
+</script>
+</html>

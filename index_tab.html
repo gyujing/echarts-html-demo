@@ -1,0 +1,102 @@
+<!doctype html>
+<html class="no-js" lang="" style="font-size: 13px;overflow-y: hidden">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title></title>
+    <link rel="stylesheet" href="js/easyUI/icon.css">
+    <link rel="stylesheet" href="js/easyUI/easyui.css">
+    <link rel="stylesheet" href="js/easyUI/demo.css">
+    <link rel="stylesheet" href="js/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/common_mdsd.css">
+    <script src="js/bootstrap-3.3.7-dist/js/jquery1.9.1.js"></script>
+    <script src="js/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+    <script src="js/easyUI/jquery.easyui.min.js"></script>
+    <script src="js/index_tab_yl.js"></script>
+</head>
+
+<body id="contain" class="container-fluid bodyStyle">
+<!-- 头 开始 -->
+<div class="row head clearfix">
+    <div class="col-xs-5 col-sm-7 col-md-8 col-lg-9 logo logoDormitory" style="margin-top: 0">
+        <div style="float:left;"></div>
+        <div style="float:left;width: 1px;height: 50%; margin-top:17px;background: #5b76d0"></div>
+        <div style="float: left;padding-left: 25px;height: 70px">
+            <span>公网</span>
+            <p>公网效果库<i class="i">V2.0</i></p>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-5 col-md-4 col-lg-3">
+        <div class="row">
+            <div class="col-xs-4 col-sm-4 col-md-5 col-lg-6">
+                <div class="row">
+                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="padding-right: 0;padding-left: 0">
+                        <span class="right_a"><i class="message">5</i></span>
+                    </div>
+                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="padding-right: 0;padding-left: 0">
+                        <span class="right_c fullBtn"></span>
+                        <span class="right_c exBtn"></span>
+                    </div>
+                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="padding-right: 0;padding-left: 0">
+                        <span class="right_b" onclick="backToLogin()"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-8 col-sm-8 col-md-7 col-lg-6">
+                <div class="row welcome clearfix">
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-4"></div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-5 haName ">
+                        <p>欢迎您登录</p><span>李文华</span>
+                    </div>
+                    <div class="col-xs-1 col-sm-1 col-md-1 col-lg-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 头 结束 -->
+<!-- 身 开始 -->
+<div class="row scrollHeight">
+    <div class="navBar clearfix mR " id="main_worksite">
+        <div class="sideLeft" id="sideLeft" data-flag="0">
+            <div id="showMenu" class="showMenu"></div>
+            <div id="hiddenMenu" class="hiddenMenu"></div>
+            <div class="treebox scrollXY ">
+                <ul class="firMenu">
+                    <li>
+                        <p class="firChild menu_icon_qygl" data-url="echarts/bar.html"><a>柱状图</a></p>
+                    </li>
+                    <li>
+                        <p class="firChild menu_icon_kszb" data-url="echarts/line.html"><a>折线图</a></p>
+                    </li>
+                    <li>
+                        <p class="firChild menu_icon_hzaq" data-url="echarts/pie.html"><a>饼图</a></p>
+                    </li>
+                    <li>
+                        <p class="firChild menu_icon_grsj" data-url="echarts/scatter.html"><a>散点图</a></p>
+                    </li>
+                    <li>
+                        <p class="firChild menu_icon_grsj" data-url="echarts/map.html"><a>地图</a></p>
+                    </li>
+                    <li>
+                        <p class="firChild menu_icon_grsj" data-url="echarts/liquidFill.html"><a>水球图</a></p>
+                    </li>
+                    <li>
+                        <p class="firChild menu_icon_grsj" data-url="echarts/pictorialBar.html"><a>象形柱图</a></p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!--菜单栏结束-->
+    <!--表格开始-->
+    <div id="demo" style="background-color: #EEEFF4">
+        <div id="tabTitle" class="easyui-tabs" style="height: 100%">
+        </div>
+    </div>
+    <!--表格结束-->
+</div>
+<!-- 身 结束 -->
+</body>
+
+</html>

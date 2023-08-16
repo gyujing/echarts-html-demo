@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv=“X-UA-Compatible” content=“IE=8″>
+  <title>登录</title>
+  <link rel="stylesheet" href="js/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/common_mdsd.css">
+  <script src="js/bootstrap-3.3.7-dist/js/jquery1.9.1.js"></script>
+  <script src="js/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+  <script src="js/login_yl.js"></script>
+</head>
+<body>
+<header class="container-fluid" style="overflow:hidden;">
+  <div class="row loginOut">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 logo" >
+          <div class="logo login_div" style="margin-left: 25px;float: left;margin-top: 0"></div>
+          <div style="float:left;width: 1px;height: 35px; margin-top:17px;background: #5b76d0"></div>
+          <div class="" style="float: left;padding-left: 25px;height: 70px">
+            <span>公网</span>
+            <p>公网效果库<i class="i">V2.0</i></p>
+          </div>
+        </div>
+  </div>
+  <div class="row loginBack loginOut">
+    <div class="col-xs-3 col-sm-4 col-md-5 col-lg-7"></div>
+    <div id="login_wrap" class="col-xs-8 col-sm-7 col-md-5 col-lg-3 login" style="padding-bottom: 0;">
+      <form action="">
+        <p>登录名:</p>
+        <div class="inputClo name"><input type="text" name="" value="" placeholder="请输入登录名"></div>
+        <p class="clearfix fA">登录密码:<a href="javascript:void 0;" class="fl ">忘记密码？</a></p>
+        <div class="inputClo lock"><input type="password" name="" value="" placeholder="登录密码"></div>
+        <div class="check">自动登录</div>
+      </form>
+      <input class="loginBtn" type="submit" onclick="loginBtn()" name="" value="登录">
+      <div style="height: 40px" ><div class="login_switch_qr_wrap" onclick="switch_qr()"></div></div>
+    </div>
+    <div id="qr_wrap" class="col-xs-8 col-sm-7 col-md-5 col-lg-3 login" style="padding-bottom: 0;height:367px;">
+      <div style="text-align: left"></div>
+      <div style="text-align: center"></div>
+      <div><p style="text-align: center"><span style="font-weight: 600;font-size: 16px">苏州麦迪斯顿医疗科技股份有限公司</span></br>提供技术支持
+      </p></div>
+      <div style="height: 40px" ><div class="login_switch_login_wrap"  onclick="switch_log()"></div></div>
+    </div>
+    <div class="col-xs-2 col-sm-3 col-md-2 col-lg-2" ></div>
+  </div>
+</header>
+<script>
+    function switch_log(){$('#login_wrap').css({display:'block'});$('#qr_wrap').css({display:'none'})}
+    function switch_qr(){$('#login_wrap').css({display:'none'});$('#qr_wrap').css({display:'block'})}
+</script>
+</body>
+
+</html>

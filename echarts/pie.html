@@ -1,0 +1,2279 @@
+<!doctype html>
+<html class="no-js" lang="">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title></title>
+    <link rel="stylesheet" href="../js/easyUI/icon.css">
+    <link rel="stylesheet" href="../js/easyUI/easyui.css">
+    <link rel="stylesheet" href="../js/easyUI/demo.css">
+    <link rel="stylesheet" href="../js/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/common_mdsd.css">
+    <link rel="stylesheet" href="../css/font.css">
+    <script src="../js/bootstrap-3.3.7-dist/js/jquery1.9.1.js"></script>
+    <script src="../js/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+    <script src="../js/easyUI/jquery.easyui.min.js"></script>
+    <script src="../js/echarts.js"></script>
+    <script src="../js/echarts-tooltip-carousel.js"></script>
+    <script src="../js/index_tab_yl.js"></script>
+    <script src="../js/data.js"></script>
+    <style>
+        .child_menu {
+            width: 32.4%;
+            height: 220px;
+            margin-bottom: 10px;
+            border-color: #ddd
+        }
+
+        pre {
+            height: 500px;
+            display: none;
+            color: black;
+            font-size: 16px;
+            background: white
+        }
+
+        pre.on {
+            display: block
+        }
+
+        .child_menu:hover {
+            opacity: 0.6;
+        }
+
+        .preRemove {
+            position: relative;
+            top: 28px;
+            right: -97%;
+            color: #b02f25;
+            font-size: 17px;
+            display: none;
+            width: 0;
+        }
+
+        .preRemove:hover {
+            color: red;
+        }
+    </style>
+
+</head>
+
+<body id="contain" class="container-fluid bodyStyle">
+<div style="padding-top: 20px;padding-left: 30px;">
+    <div class="title_grad">
+        <div></div>
+        <p>饼图</p>
+    </div>
+    <div style="width: 100%;">
+        <div class="child_menu">
+            <!-- C3-1 饼图-->
+            <div id="C3-1" style="width:100%;height:220px;"></div>
+        </div>
+        <div class="child_menu">
+            <!-- C3-2 饼图带图标-->
+            <div id="C3-2" style="width:100%;height:220px;"></div>
+        </div>
+        <div class="child_menu maR0">
+            <!-- C3-3 饼图3-->
+            <div id="C3-3" style="width:100%;height:220px;"></div>
+        </div>
+    </div>
+    <div><span class="glyphicon glyphicon-remove preRemove"></span>
+        <pre class="C3-1">
+    // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+            <!-- C3-1 饼图-->
+    window.onload=initPieCharts1();//加载图表
+    function initPieCharts1(){
+        var discountTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/MZB_1.cda&dataAccessId=pie_ds";
+        // discountTypeUrl += "&amp;paramgetks=" + getks;
+        discountTypeUrl += "&amp;paramgetks=" + "ALL";
+        var discountTypeJSON = readJSONFile(discountTypeUrl).resultset;
+        var data = PieDataEncapsulation(discountTypeJSON);
+        chartDrew(GetDiscountTypeOption( data.series,data.series),  // option
+            echarts.init(document.getElementById("C3-1")) //chart
+        )
+    }
+    // 封装数据
+    function PieDataEncapsulation (cdaData){
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        'value'  : cdaData[i][1],
+                        //  selected : true
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            series : series
+        };
+    };
+    // option
+    function GetDiscountTypeOption (PLegends,PSeries){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger : 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter: function(params) {
+                    var res = " 类别：" + params.name + '&lt;br/&gt;' + "人次：" + params.value;
+                    return res;
+                }
+            },
+            //图例组件。
+            legend : {
+                //图例列表的布局朝向。default: 'horizontal'，可选：'horizontal'、'vertical'
+                orient: 'vertical',
+                // 图例组件离容器左侧的距离。
+                left : 'left',
+                //图例组件离容器上侧的距离。
+                top:'middle',
+                data : PLegends
+            },
+            //调色盘颜色列表
+            color:['#5b9bd5',' #8bb1dd','#d9d9d9','#b0dcd5',
+                '#96cfac','#89a3c6','#bbcce9',
+                '#72cfd7',
+                '#4472c4',
+                '#255e91'],
+            //工具栏。
+            toolbox : {
+                show : true,
+                //工具栏 icon 的布局朝向。default: 'horizontal'，可选：'horizontal'、'vertical'
+                orient : 'vertical',
+                //各工具配置项。
+                feature : {
+                    mark : {
+                        show : true
+                    },
+                    //动态类型切换
+                    magicType : {
+                        //是否显示该工具。
+                        show : true,
+                        //启用的动态类型，包括'line'（切换为折线图）, 'bar'（切换为柱状图）, 'stack'（切换为堆叠模式）, 'tiled'（切换为平铺模式）,'funnel'(切换为漏斗图)。
+                        type : ['pie','funnel'],
+                        //各个类型的专有配置项
+                        option : {
+                            funnel : {
+                                x : '25%',
+                                width : '50%',
+                                //水平方向对齐布局类型
+                                funnelAlign : 'bottom',
+                                max : 1548
+                            }
+                        }
+                    }
+                }
+            },
+            //是否显示拖拽用的手柄
+            calculable : true,
+            //系列列表
+            series : [
+                {
+                    name : "人次",
+                    type :'pie',
+                    // 饼图的半径，数组的第一项是内半径，第二项是外半径。
+                    radius: ['40%', '70%'],
+                    //是否启用防止标签重叠策略。default: true
+                    avoidLabelOverlap: false,
+                    //饼图的中心（圆心）坐标，数组的第一项是横坐标，第二项是纵坐标。default: ['50%', '50%']
+                    center: ['50%', '50%'],
+                    data : PSeries,
+                    //图形样式。
+                    itemStyle : {
+                        normal : {
+                            //标签
+                            label : {
+                                position : 'inner',
+                                //标签内容格式器
+                                //{a}：系列名。{b}：数据名。{c}：数据值。{d}：百分比。{@xxx}：数据中名为'xxx'的维度的值，{@[n]}：数据中维度n的值，
+                                formatter: function (params){
+                                    return (params.percent - 0) + '%';
+                                },
+                                textStyle : {
+                                    color : '#000'
+                                },
+                            },
+                            //标签的视觉引导线样式
+                            labelLine : {
+                                show : true
+                            },
+                        },
+                        //高亮的扇区和标签样式。
+                        emphasis : {
+                            //饼图图形上的文本标签
+                            label : {
+                                show : true
+                            },
+                            //标签的视觉引导线样式
+                            labelLine : {
+                                show :true
+                            }
+                        }
+                    },
+                    //饼图图形上的文本标签
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'center'
+                        },
+                        //高亮的扇区和标签样式。
+                        emphasis: {
+                            show: true,
+                            textStyle: {
+                                fontSize: '20',
+                            }
+                        }
+                    }
+                }
+            ]
+        };
+    };
+        </pre>
+        <pre class="C3-2">
+         // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+            <!-- C3-2 饼图带图标-->
+    window.onload=initPieCharts2();//加载图表
+    function initPieCharts2(){
+
+        var discountTypeUrl ="https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/SSJSS_1_KS.cda&dataAccessId=C2_DS";
+        // discountTypeUrl += "&amp;parambutton_event=" + button_event;
+        // alert(discountTypeUrl)
+        var discountTypeJSON = readJSONFile(discountTypeUrl).resultset;
+        var data = PieDataEncapsulation2(discountTypeJSON);
+        chartDrew(GetDiscountPieTypeOption( data.series,data.series),  // option
+            echarts.init(document.getElementById("C3-2")) //chart
+        )
+    }
+    // 封装数据
+    function PieDataEncapsulation2 (cdaData){
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        'value'  : cdaData[i][1],
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            series : series
+        };
+    };
+    // option
+    function GetDiscountPieTypeOption (PLegends,PSeries){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger : 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                //{a}, {b}，{c}，{d}，分别表示系列名，数据项名称，数据值，百分比}等
+                formatter: "{a} &lt;br/&gt;{b} : {c} ({d}%)"
+            },
+            //图例组件。
+            legend : {
+                //图例列表的布局朝向。default: 'horizontal'，可选：'horizontal'、'vertical'
+                orient: 'vertical',
+                //图例组件离容器左侧的距离。
+                left : 'left',
+                //图例组件离容器上侧的距离。
+                top:'middle',
+                data : PLegends
+            },
+
+            color:['#1790cf', '#99d2dd','#bfbfbf'],
+            //系列列表
+            series : [
+                {
+                    name:'人次',
+                    type :'pie',
+                    // 饼图的半径，数组的第一项是内半径，第二项是外半径。
+                    radius: ['55%', '85%'],
+                    //是否启用防止标签重叠策略。default: true
+                    avoidLabelOverlap: false,
+                    //图形样式。
+                    itemStyle : {
+                        //高亮的扇区和标签样式。
+                        emphasis: {
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                            //阴影水平方向上的偏移距离。
+                            shadowOffsetX: 0,
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    data : PSeries,
+
+                }
+            ]
+        };
+    };
+      </pre>
+        <pre class="C3-3">
+         // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+            <!-- C3-3 饼图3-->
+    window.onload=initPieCharts3();
+    function initPieCharts3(){
+        var discountTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/ZYQFZE.cda&dataAccessId=zyqfmx_qfzb_pie_ds";
+        // discountTypeUrl  += "&amp;paramtimestart=" + timestart +"&amp;paramtimeend=" + timeend +"&amp;paramgetks=" + getks;
+
+        var discountTypeJSON = readJSONFile(discountTypeUrl).resultset;
+        var data = PieDataEncapsulation3(discountTypeJSON);
+        chartDrew(GetDiscountTypeOption2( data.series,data.series),  // option
+            echarts.init(document.getElementById("C3-3")) //chart
+        )
+    }
+    // 封装数据
+    function PieDataEncapsulation3 (cdaData){
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        'value'  : cdaData[i][1]
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            series : series
+        };
+    };
+    // option
+    function GetDiscountTypeOption2 (PLegends,PSeries){
+        return {
+            //标题组件
+            title: {
+                //主标题文本
+                text: '',
+                //grid 组件离容器左侧的距离
+                left: 'left',
+                //grid 组件离容器上侧的距离
+                top: 'top',
+                textStyle: {
+                    color: '#333',
+                    fontWeight: 'bolder',
+                    fontSize: 40,
+                }
+            },
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger : 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                //{a}, {b}，{c}，{d}，分别表示系列名，数据项名称，数据值，百分比}等
+                formatter: "{a} &lt;br/&gt;{b} : {c} ({d}%)"
+            },
+            //图例组件。
+            legend : {
+                //图例列表的布局朝向。default: 'horizontal'，可选：'horizontal'、'vertical'
+                orient: 'vertical',
+                //图例组件离容器左侧的距离。
+                left : 'left',
+                //图例组件离容器上侧的距离。
+                top:'middle',
+                data : PLegends
+            },
+            // color:['#CCCCCC','#CCCC99','#CC99FF','#CCCCFF','#99CCFF','#9966FF','#9999FF','#99CC99','#FFCC99','#FFCCFF','#FFCC66','#FFCC00'],
+            color:['#1790cf ','#1bb2d8','#99d2dd','#88b0bb','#1c7099'],
+            //图例列表
+            series : [
+                {
+                    name:'金额',
+                    type :'pie',
+                    // 饼图的半径，数组的第一项是内半径，第二项是外半径。
+                    radius: ['50%', '80%'],
+                    //饼图的中心（圆心）坐标，数组的第一项是横坐标，第二项是纵坐标。default: ['50%', '50%']
+                    center:['52%','50%'],
+                    //是否启用防止标签重叠策略。default: true
+                    avoidLabelOverlap: false,
+                    //饼图图形上的文本标签
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'center'
+                        },
+                        //高亮的扇区和标签样式。
+                        emphasis: {
+                            show: true,
+                            textStyle: {
+                                fontSize: '14',
+                            }
+                        }
+                    },
+                    //标签的视觉引导线样式
+                    labelLine: {
+                        normal: {
+                            show: false
+                        }
+                    },
+                    data : PSeries,
+
+                }
+            ]
+        };
+    };
+      </pre>
+    </div>
+    <div style="width: 100%;">
+        <div class="child_menu">
+            <div id="C3-4" style="width:100%;height:220px;"></div>
+        </div>
+        <div class="child_menu">
+            <div id="C3-5" style="width:100%;height:220px;"></div>
+        </div>
+        <div class="child_menu maR0">
+            <div id="C3-6" style="width:100%;height:220px;"></div>
+        </div>
+    </div>
+    <div><span class="glyphicon glyphicon-remove preRemove"></span>
+        <pre class="C3-4">
+    // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+
+    //C3-4
+    window.onload = initPieCharts4();
+
+    function initPieCharts4() {
+        var dataValue = getPieData1();
+        var total = {
+            // name: '集宿区',
+            value: '3000'
+        };
+        var dataStyle = {
+            normal: {
+                label: {
+                    show: false
+                },
+                labelLine: {
+                    show: false
+                },
+                shadowBlur: 15,
+                shadowColor: 'white',
+            }
+        };
+        var option = GetPieTypeOption1(dataValue, total, dataStyle);
+
+        var dom = document.getElementById("C3-4");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+        tools.loopShowTooltip(myChart, option, {
+            loopSeries: true
+        });
+    }
+
+    //获取数据
+    function getPieData1() {
+        var dataValue = [
+            {value: 335, name: '东沙湖所'},
+            {value: 310, name: '湖东所'},
+            {value: 234, name: '湖西所'},
+            {value: 135, name: '娄葑所'},
+            {value: 400, name: '胜浦所'},
+            {value: 335, name: '唯亭所'},
+            {value: 310, name: '斜塘所'},
+            {value: 234, name: '半岛所'},
+            {value: 135, name: '永安桥所'},
+            {value: 548, name: '综保所'}
+        ];
+        return dataValue;
+    }
+
+    //option
+    function GetPieTypeOption1(dataValue, total, dataStyle) {
+        return {
+            //   backgroundColor:'#0C3053',
+//     tooltip: {
+//         show:true,
+//         trigger: 'item',
+//       // formatter: "{a} <br/>{b}: {c} ({d}%)",
+//         formatter: " {b}: {c} <br/> {d}%",
+// textStyle:{align:'center'}
+//     },
+            title: [{
+                text: total.name,
+                left: '50%',
+                top: '50%',
+                textAlign: 'center',
+                textBaseline: 'middle',
+                textStyle: {
+                    color: '#fff',
+                    fontWeight: 'normal',
+                    fontSize: 12
+                }
+            },
+                {
+                    text: total.value,
+                    left: '50%',
+                    top: '50%',
+                    textAlign: 'center',
+                    textBaseline: 'middle',
+                    textStyle: {
+                        color: '#A3F9FF',
+                        fontWeight: 'normal',
+                        fontSize: 14
+                    }
+                }],
+            series: [
+                {
+                    color: ['#3dd4de', '#047eca', '#4BB3D4', '#3b7186', '#2e8d94',
+                        '#3b64a6', '#2672cc', '#5d3ec5', '#0d9abb', '#00c0e9'
+                    ],
+                    name: '集宿区',
+                    type: 'pie',
+                    radius: ['40%', '55%'],
+                    //是否启用防止标签重叠策略，默认开启
+                    avoidLabelOverlap: true,
+                    itemStyle: dataStyle,
+                    label: {
+                        normal: {
+                            show: false,
+                            // position: 'outside',
+                            //  padding:[0,-10],
+                            //  formatter: '{b}: {c}\n  {d}%',
+                            formatter: '{b}\n{c}',
+                            textStyle: {
+                                color: "#777",
+                                // align:'center',
+                            }
+                        },
+                        emphasis: {
+                            show: true,
+                            padding: [0, -10],
+                            textStyle: {
+                                fontSize: '12',
+                                // fontWeight: 'bold',
+                                color: "#777",
+                                align: 'center'
+                            }
+                        }
+                    },
+                    labelLine: {
+                        normal: {
+                            show: false
+                        }
+                    },
+                    data: dataValue
+                },
+
+            ]
+        }
+    };
+        </pre>
+        <pre class="C3-5">
+    // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+
+    //C3-5
+    window.onload = initPieCharts5();
+
+    function initPieCharts5() {
+        var dataValue = getPieData2();
+        var dataStyle = {
+            normal: {
+                label: {
+                    show: false
+                },
+                labelLine: {
+                    show: false
+                },
+                shadowBlur: 40,
+                shadowColor: 'rgba(40, 40, 40, 0.5)',
+            }
+        };
+        var placeHolderStyle = {
+            normal: {
+                color: '#3a91d2', // 未完成的圆环的颜色
+                label: {
+                    show: false
+                },
+                labelLine: {
+                    show: false
+                }
+            },
+            emphasis: {
+                color: 'rgba(44,59,70,1)' // 未完成的圆环的颜色
+            }
+        };
+        var option0 = GetPieTypeOption2(dataValue.data1, dataValue.data2, dataStyle, placeHolderStyle);
+        var dom0 = document.getElementById("C3-5");
+        myChart0 = echarts.init(dom0);
+        chartDrew(option0, myChart0);
+        setInterval(function () {
+            myChart0.dispose();
+            $("#C3-5").html("");
+            myChart0 = echarts.init(dom0);
+            myChart0.setOption(option0);
+        }, 5000);
+    }
+
+    function getPieData2() {
+        var data1 = 35;
+        var data2 = 65;
+        return {data1: data1, data2: data2};
+    }
+
+    //option
+    function GetPieTypeOption2(data1, data2, dataStyle, placeHolderStyle) {
+        return {
+            // backgroundColor:'#0C3053',
+            tooltip: {
+                show: false,
+            },
+            toolbox: {
+                show: false,
+            },
+            // color : ['#3dd4de','#b697cd','#a6f08f'],
+            // backgroundColor: 'rgba(0,0,0,0.8)',
+            series: [{
+                name: '空关',
+                type: 'pie',
+                clockWise: false,
+                radius: [60, 65],
+                itemStyle: dataStyle,
+                //是否开启 hover 在扇区上的放大动画效果。
+                hoverAnimation: false,
+                center: ['50%', '50%'],
+                data: [{
+                    value: data1,
+                    label: {
+                        normal: {
+                            formatter: '{a}\n{c}%',
+                            position: 'center',
+                            show: true,
+                            textStyle: {
+                                fontSize: '15',
+                                fontWeight: 'normal',
+                                color: '#3dd4de'
+                            }
+                        }
+                    },
+                    // itemStyle: {
+                    //     normal: {
+                    //         color: '#3dd4de',
+                    //         shadowColor: '#3dd4de',
+                    //         shadowBlur: 10
+                    //     }
+                    // }
+                    itemStyle: {
+                        normal: {
+                            borderWidth: 5,
+                            //阴影长度
+                            shadowBlur: 30,
+                            borderColor: new echarts.graphic.LinearGradient(0, 0, 1, 1, [{
+                                offset: 0,
+                                color: '#7777eb'
+                            }, {
+                                offset: 1,
+                                color: '#70ffac'
+                            }]),
+                            shadowColor: 'rgba(142, 152, 241, 0.6)'
+                        }
+                    }
+                }, {
+                    value: data2,
+                    name: 'invisible',
+                    itemStyle: placeHolderStyle,
+                }]
+            },]
+        }
+    };
+        </pre>
+        <pre class="C3-6">
+    // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+
+    //C3-6
+    window.onload = initPieCharts6();
+
+    function initPieCharts6() {
+        var dataValue = getPieData3();
+        var dataStyle = {
+            normal: {
+                label: {
+                    show: true
+                },
+                labelLine: {
+                    show: true
+                },
+                shadowBlur: 15,
+                shadowColor: 'white',
+            }
+        };
+        var option = GetPieTypeOption3(dataValue, dataStyle);
+
+        var dom = document.getElementById("C3-6");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getPieData3() {
+        var dataValue = [{
+            value: 335,
+            name: '群1',
+        },
+            {
+                value: 310,
+                name: '群2'
+            },
+            {
+                value: 274,
+                name: '群3'
+            },
+            {
+                value: 235,
+                name: '群4'
+            },
+            {
+                value: 400,
+                name: '群5'
+            },
+            {
+                value: 279,
+                name: '群6'
+            },
+            {
+                value: 179,
+                name: '群7'
+            }
+        ];
+
+        return dataValue;
+    }
+
+    function GetPieTypeOption3(dataValue, dataStyle) {
+        return {
+            //    backgroundColor:'#0C3053',
+            color: ['#3dd4de', '#3b7186', '#d0a00e', '#0d9abb', '#5d3ec5', '#2672cc', '#3b64a6'],
+            //  backgroundColor: '#2c343c',
+
+            // tooltip: {
+            //     trigger: 'item',
+            //     formatter: "{a} <br/>{b} : {c} ({d}%)"
+            // },
+            //视觉映射组件
+            visualMap: {
+                show: false,
+                min: 80,
+                max: 600,
+                inRange: {
+                    colorLightness: [0, 1]
+                }
+            },
+            series: [{
+                name: '群租房',
+                type: 'pie',
+                radius: '70%',
+                center: ['50%', '50%'],
+                itemStyle: dataStyle,
+                data: dataValue.sort(function (a, b) {
+                    return a.value - b.value;
+                }),
+                //是否展示成南丁格尔图，通过半径区分数据大小
+                //'radius' 扇区圆心角展现数据的百分比，半径展现数据的大小。
+                //'area' 所有扇区圆心角相同，仅通过半径展现数据大小。
+                roseType: 'radius',
+                label: {
+                    normal: {
+                        formatter: '{b}\n{c}',
+                        textStyle: {
+                            color: '#777',
+
+                        }
+                    }
+                },
+                labelLine: {
+                    normal: {
+                        lineStyle: {
+                            color: 'rgba(255, 255, 255, 0.3)'
+                        },
+                        smooth: 0.2,
+                        length: 1,
+                        length2: 1
+                    }
+                },
+                // itemStyle: {
+                //     normal: {
+                //        // color: ['#85b6b2'],
+                //         shadowBlur: 200,
+                //         shadowColor: 'rgba(0, 0, 0, 0.5)'
+                //     }
+                // },
+
+                // animationType: 'scale',
+                // animationEasing: 'elasticOut',
+                // animationDelay: function(idx) {
+                //     return Math.random() * 200;
+                // }
+            }]
+        };
+    }
+
+        </pre>
+    </div>
+    <div style="width: 100%;">
+        <div class="child_menu">
+            <div id="C3-7" style="width:100%;height:220px;"></div>
+        </div>
+        <div class="child_menu">
+            <div id="C3-8" style="width:100%;height:220px;"></div>
+        </div>
+
+    </div>
+    <div><span class="glyphicon glyphicon-remove preRemove"></span>
+        <pre class="C3-7">
+    // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+
+    //C3-7
+    window.onload = initPieCharts7();
+
+    function initPieCharts7() {
+        var echartData = getPieData4();
+        var scale = 1;
+        var rich = {
+            yellow: {
+                color: "#ffc72b",
+                fontSize: 30 * scale,
+                padding: [5, 4],
+                align: 'center'
+            },
+            total: {
+                color: "#00C6FF",
+                fontSize: 30 * scale,
+                fontFamily: '方正大黑',
+                fontWeight: 'bold',
+                align: 'center'
+            },
+            white: {
+                color: "#fff",
+                align: 'center',
+                fontSize: 14 * scale,
+                padding: [21, 0]
+            },
+            blue: {
+                color: '#49dff0',
+                fontSize: 16 * scale,
+                align: 'center'
+            },
+            hr: {
+                borderColor: '#0b5263',
+                width: '100%',
+                borderWidth: 1,
+                height: 0,
+            }
+        }
+        var option = GetPieTypeOption4(echartData, rich, scale);
+        var dom = document.getElementById("C3-7");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getPieData4() {
+        var dataValue = [
+            {value: 3, name: '未知'},
+            {value: 6, name: '警告'},
+            {value: 2, name: '严重'},
+            {value: 1, name: '致命'}
+
+        ]
+        return dataValue;
+    }
+
+    function GetPieTypeOption4(echartData, rich, scale) {
+        return {
+            //  backgroundColor: '#020933',
+            tooltip: {
+                trigger: 'item',
+                formatter: "{b}: {c} ({d}%)",
+
+            },
+            title: {
+                text: '总告警数',
+                left: 'center',
+                top: '53%',
+                padding: [10, 0],
+                textStyle: {
+                    color: '#85b6b2',
+                    fontSize: 12 * scale,
+                    align: 'center'
+                }
+            },
+            legend: {
+                //图例选择的模式
+                selectedMode: false,
+                formatter: function (name) {
+                    var total = 0; //各科正确率总和
+                    var averagePercent; //综合正确率
+                    echartData.forEach(function (value, index, array) {
+                        total += value.value;
+                    });
+                    return '{total|' + total + '}';
+                },
+                data: [echartData[0].name],
+                // data: ['高等教育学'],
+                // itemGap: 50,
+                left: 'center',
+                top: 'center',
+                icon: 'none',
+                align: 'center',
+                textStyle: {
+                    color: "#fff",
+                    fontSize: 16 * scale,
+                    rich: rich
+                },
+            },
+            series: [
+                {
+                    name: '访问来源',
+                    type: 'pie',
+                    //是否开启 hover 在扇区上的放大动画效果。
+                    hoverAnimation: false,
+                    //是否启用图例 hover 时的联动高亮。
+                    legendHoverLink: false,
+                    //饼图的半径，数组的第一项是内半径，第二项是外半径。
+                    radius: ['50%', '55%'],
+                    // color: ['#915872', '#3077b7', '#9a8169', '#3f8797','#5b8144','#307889','#9c6a79'],
+                    label: {
+                        normal: {
+                            position: 'inner'
+                        }
+                    },
+                    labelLine: {
+                        normal: {
+                            show: false
+                        },
+
+                    },
+                    tooltip: {
+                        show: false,
+
+
+                    },
+
+                    data: [
+                        {
+                            value: 0,
+                            itemStyle: {
+                                normal: {
+                                    color: '#ccc',
+                                    shadowBlur: 50,
+                                    shadowColor: 'white',
+                                    show: true
+                                }
+                            }
+                        }
+
+                    ]
+                },
+                {
+                    // name:'访问来源',
+                    type: 'pie',
+                    radius: ['52%', '70%'],
+                    color: ['#00acee', '#52cdd5', '#79d9f1', '#cd5e7e', '#60a900', '#01949b', ' #f17677'],
+                    label: {
+                        normal: {
+                            padding: [0, -10],
+                            formatter: '{b}\n{c}'
+                        },
+
+                    },
+                    labelLine: {
+                        normal: {
+                            show: false
+                        },
+                    },
+                    data: echartData
+                }
+            ]
+        };
+    }
+        </pre>
+        <pre class="C3-8">
+     // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+
+    //C3-8
+    window.onload = initPieCharts8();
+
+    function initPieCharts8() {
+        var echartData = getPieData5();
+        var option = GetPieTypeOption5(echartData);
+        var dom = document.getElementById("C3-8");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getPieData5() {
+        var dataValue = [{
+            value: 75
+
+        }, {
+            value: 25,
+            label: {
+                normal: {
+                    show: false
+                }
+            }
+        }]
+        return dataValue;
+    }
+
+    function GetPieTypeOption5(echartData) {
+        return {
+            // title: {
+            //     text: '及时率',
+            //     x: '50%',
+            //     y: '45%',
+            //     textAlign: "center",
+            //     textStyle: {
+            //         fontWeight: 'normal',
+            //         fontSize: 12,
+            //          color: '#fff'
+            //     },
+            //     subtextStyle: {
+            //         fontWeight: 'bold',
+            //         fontSize: 32,
+            //         color: '#fff'
+            //     }
+            // },
+            series: [{
+                name: ' ',
+                type: 'pie',
+                radius: ['50%', '70%'],
+                //起始角度
+                startAngle: 225,
+                color: [new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                    offset: 0,
+                    color: '#00a2ff'
+                }, {
+                    offset: 1,
+                    color: '#70ffac'
+                }]), "transparent"],
+                //是否开启 hover 在扇区上的放大动画效果。
+                hoverAnimation: false,
+                //是否启用图例 hover 时的联动高亮。
+                legendHoverLink: false,
+                //是否启用防止标签重叠策略
+                "avoidLabelOverlap": false,
+                label: {
+                    normal: {
+                        formatter: '及时率\n{c}%',
+                        position: 'center',
+                        show: true,
+                        textStyle: {
+                            fontSize: '15',
+                            fontWeight: 'normal',
+                            color: '#3dd4de'
+                        }
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        borderColor: "transparent",
+                        borderWidth: "20"
+                    },
+                    emphasis: {
+                        borderColor: "transparent",
+                        borderWidth: "20"
+                    }
+                },
+                z: 10,
+                labelLine: {
+                    normal: {
+                        show: false
+                    }
+                },
+                data: echartData
+            }
+                // , {
+                //     name: '',
+                //     type: 'pie',
+                //     radius: ['50%', '70%'],
+                //     startAngle: 225,
+                //     color: ["#c2f5e1", "transparent"],
+                //     labelLine: {
+                //         normal: {
+                //             show: false
+                //         }
+                //     },
+                //     data: [{
+                //         value: 75
+                //     }, {
+                //         value: 25
+                //     }]
+                // }
+
+            ]
+        };
+    }
+        </pre>
+
+    </div>
+</div>
+<div>
+
+</div>
+</body>
+<script>
+    $(document).on('click', '.child_menu p', function (event) {
+        event.stopPropagation();
+        if (typeof($(this).attr("data-url")) == "undefined") {
+            console.log("没有链接")
+        } else {
+            var url = $(this).attr("data-url");
+            var title = $(this).text();
+            parent.window.addTab(title, url);
+        }
+    });
+    $('.child_menu>div').click(function () {
+        $('pre').parent().children('span').css({display: 'none'});
+        $('.child_menu>div').parent().css({'border-color': '#ddd'});
+        $(this).parent().css({'border-color': '#5497f2'});
+        var id = $(this)[0].id;
+        $('pre').removeClass('on');
+        $('.' + id).addClass('on');
+        $('.' + id).parent().children('span').css({display: 'block'});
+    });
+    $('.preRemove').click(function () {
+        $('pre.on').parent().children('span').css({display: 'none'});
+        $('pre.on').removeClass('on');
+    })
+</script>
+<script>
+    // 请求接口
+    function readJSONFile(url) {
+        var jsonData;
+        $.ajax({
+            type: 'GET', url: url, async: false, dataType: 'json', data: null,
+            success: function (response) {
+                jsonData = response;
+            }
+        });
+        return jsonData;
+    }
+
+    // 绘制图表
+    function chartDrew(option, chart) {
+        chart.setOption(option);
+        window.addEventListener('resize', function () {
+            chart.resize();
+        })
+    }
+
+    <!-- 饼图 start-->
+    <!-- C3-1 饼图-->
+    window.onload = initPieCharts1();//加载图表
+    function initPieCharts1() {
+        var discountTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/MZB_1.cda&dataAccessId=pie_ds";
+        // discountTypeUrl += "&paramgetks=" + getks;
+        discountTypeUrl += "&paramgetks=" + "ALL";
+        // var discountTypeJSON = readJSONFile(discountTypeUrl).resultset;
+        // var data = PieDataEncapsulation(discountTypeJSON);
+        var data = getData1();
+        chartDrew(GetDiscountTypeOption(data.series, data.series),  // option
+            echarts.init(document.getElementById("C3-1")) //chart
+        )
+    }
+
+    // 封装数据
+    function PieDataEncapsulation(cdaData) {
+        var series =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length; i++) {
+                    tempArr.push({
+                        'name': cdaData[i][0],
+                        'value': cdaData[i][1],
+                        //  selected : true
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            series: series
+        };
+    };
+
+    // option
+    function GetDiscountTypeOption(PLegends, PSeries) {
+        return {
+            //提示框组件
+            tooltip: {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter: function (params) {
+                    var res = " 类别：" + params.name + '<br/>' + "人次：" + params.value;
+                    return res;
+                }
+            },
+            //图例组件。
+            legend: {
+                //图例列表的布局朝向。default: 'horizontal'，可选：'horizontal'、'vertical'
+                orient: 'vertical',
+                // 图例组件离容器左侧的距离。
+                left: 'left',
+                //图例组件离容器上侧的距离。
+                top: 'middle',
+                data: PLegends
+            },
+            //调色盘颜色列表
+            color: ['#5b9bd5', ' #8bb1dd', '#d9d9d9', '#b0dcd5',
+                '#96cfac', '#89a3c6', '#bbcce9',
+                '#72cfd7',
+                '#4472c4',
+                '#255e91'],
+            //工具栏。
+            toolbox: {
+                show: true,
+                //工具栏 icon 的布局朝向。default: 'horizontal'，可选：'horizontal'、'vertical'
+                orient: 'vertical',
+                //各工具配置项。
+                feature: {
+                    mark: {
+                        show: true
+                    },
+                    //动态类型切换
+                    magicType: {
+                        //是否显示该工具。
+                        show: true,
+                        //启用的动态类型，包括'line'（切换为折线图）, 'bar'（切换为柱状图）, 'stack'（切换为堆叠模式）, 'tiled'（切换为平铺模式）,'funnel'(切换为漏斗图)。
+                        type: ['pie', 'funnel'],
+                        //各个类型的专有配置项
+                        option: {
+                            funnel: {
+                                x: '25%',
+                                width: '50%',
+                                //水平方向对齐布局类型
+                                funnelAlign: 'bottom',
+                                max: 1548
+                            }
+                        }
+                    }
+                }
+            },
+            //是否显示拖拽用的手柄
+            calculable: true,
+            //系列列表
+            series: [
+                {
+                    name: "人次",
+                    type: 'pie',
+                    // 饼图的半径，数组的第一项是内半径，第二项是外半径。
+                    radius: ['40%', '70%'],
+                    //是否启用防止标签重叠策略。default: true
+                    avoidLabelOverlap: false,
+                    //饼图的中心（圆心）坐标，数组的第一项是横坐标，第二项是纵坐标。default: ['50%', '50%']
+                    center: ['50%', '50%'],
+                    data: PSeries,
+                    //图形样式。
+                    itemStyle: {
+                        normal: {
+                            //标签
+                            label: {
+                                position: 'inner',
+                                //标签内容格式器
+                                //{a}：系列名。{b}：数据名。{c}：数据值。{d}：百分比。{@xxx}：数据中名为'xxx'的维度的值，{@[n]}：数据中维度n的值，
+                                formatter: function (params) {
+                                    return (params.percent - 0) + '%';
+                                },
+                                textStyle: {
+                                    color: '#000'
+                                },
+                            },
+                            //标签的视觉引导线样式
+                            labelLine: {
+                                show: true
+                            },
+                        },
+                        //高亮的扇区和标签样式。
+                        emphasis: {
+                            //饼图图形上的文本标签
+                            label: {
+                                show: true
+                            },
+                            //标签的视觉引导线样式
+                            labelLine: {
+                                show: true
+                            }
+                        }
+                    },
+                    //饼图图形上的文本标签
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'center'
+                        },
+                        //高亮的扇区和标签样式。
+                        emphasis: {
+                            show: true,
+                            textStyle: {
+                                fontSize: '20',
+                            }
+                        }
+                    }
+                }
+            ]
+        };
+    };
+
+    <!-- C3-2 饼图带图标-->
+    window.onload = initPieCharts2();//加载图表
+    function initPieCharts2() {
+
+        var discountTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/SSJSS_1_KS.cda&dataAccessId=C2_DS";
+        // discountTypeUrl += "&parambutton_event=" + button_event;
+        // alert(discountTypeUrl)
+        // var discountTypeJSON = readJSONFile(discountTypeUrl).resultset;
+        // var data = PieDataEncapsulation2(discountTypeJSON);
+        var data = getData1();
+        chartDrew(GetDiscountPieTypeOption(data.series, data.series),  // option
+            echarts.init(document.getElementById("C3-2")) //chart
+        )
+    }
+
+    // 封装数据
+    function PieDataEncapsulation2(cdaData) {
+        var series =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length; i++) {
+                    tempArr.push({
+                        'name': cdaData[i][0],
+                        'value': cdaData[i][1],
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            series: series
+        };
+    };
+
+    // option
+    function GetDiscountPieTypeOption(PLegends, PSeries) {
+        return {
+            //提示框组件
+            tooltip: {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                //{a}, {b}，{c}，{d}，分别表示系列名，数据项名称，数据值，百分比}等
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            //图例组件。
+            legend: {
+                //图例列表的布局朝向。default: 'horizontal'，可选：'horizontal'、'vertical'
+                orient: 'vertical',
+                //图例组件离容器左侧的距离。
+                left: 'left',
+                //图例组件离容器上侧的距离。
+                top: 'middle',
+                data: PLegends
+            },
+
+            color: ['#1790cf', '#99d2dd', '#bfbfbf'],
+            //系列列表
+            series: [
+                {
+                    name: '人次',
+                    type: 'pie',
+                    // 饼图的半径，数组的第一项是内半径，第二项是外半径。
+                    radius: ['55%', '85%'],
+                    //是否启用防止标签重叠策略。default: true
+                    avoidLabelOverlap: false,
+                    //图形样式。
+                    itemStyle: {
+                        //高亮的扇区和标签样式。
+                        emphasis: {
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                            //阴影水平方向上的偏移距离。
+                            shadowOffsetX: 0,
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    data: PSeries,
+
+                }
+            ]
+        };
+    };
+
+    <!-- C3-3 饼图3-->
+    window.onload = initPieCharts3();
+
+    function initPieCharts3() {
+        var discountTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/ZYQFZE.cda&dataAccessId=zyqfmx_qfzb_pie_ds";
+        // discountTypeUrl  += "&paramtimestart=" + timestart +"&paramtimeend=" + timeend +"&paramgetks=" + getks;
+
+        // var discountTypeJSON = readJSONFile(discountTypeUrl).resultset;
+        // var data = PieDataEncapsulation3(discountTypeJSON);
+        var data = getData1();
+        chartDrew(GetDiscountTypeOption2(data.series, data.series),  // option
+            echarts.init(document.getElementById("C3-3")) //chart
+        )
+    }
+
+    // 封装数据
+    function PieDataEncapsulation3(cdaData) {
+        var series =
+            (function () {
+                var tempArr = [];
+                for (var i = 0; i < cdaData.length; i++) {
+                    tempArr.push({
+                        'name': cdaData[i][0],
+                        'value': cdaData[i][1]
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            series: series
+        };
+    };
+
+    // option
+    function GetDiscountTypeOption2(PLegends, PSeries) {
+        return {
+            //标题组件
+            title: {
+                //主标题文本
+                text: '',
+                //grid 组件离容器左侧的距离
+                left: 'left',
+                //grid 组件离容器上侧的距离
+                top: 'top',
+                textStyle: {
+                    color: '#333',
+                    fontWeight: 'bolder',
+                    fontSize: 40,
+                }
+            },
+            //提示框组件
+            tooltip: {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                //{a}, {b}，{c}，{d}，分别表示系列名，数据项名称，数据值，百分比}等
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            //图例组件。
+            legend: {
+                //图例列表的布局朝向。default: 'horizontal'，可选：'horizontal'、'vertical'
+                orient: 'vertical',
+                //图例组件离容器左侧的距离。
+                left: 'left',
+                //图例组件离容器上侧的距离。
+                top: 'middle',
+                data: PLegends
+            },
+            // color:['#CCCCCC','#CCCC99','#CC99FF','#CCCCFF','#99CCFF','#9966FF','#9999FF','#99CC99','#FFCC99','#FFCCFF','#FFCC66','#FFCC00'],
+            color: ['#1790cf ', '#1bb2d8', '#99d2dd', '#88b0bb', '#1c7099'],
+            //图例列表
+            series: [
+                {
+                    name: '金额',
+                    type: 'pie',
+                    // 饼图的半径，数组的第一项是内半径，第二项是外半径。
+                    radius: ['50%', '80%'],
+                    //饼图的中心（圆心）坐标，数组的第一项是横坐标，第二项是纵坐标。default: ['50%', '50%']
+                    center: ['52%', '50%'],
+                    //是否启用防止标签重叠策略。default: true
+                    avoidLabelOverlap: false,
+                    //饼图图形上的文本标签
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'center'
+                        },
+                        //高亮的扇区和标签样式。
+                        emphasis: {
+                            show: true,
+                            textStyle: {
+                                fontSize: '14',
+                            }
+                        }
+                    },
+                    //标签的视觉引导线样式
+                    labelLine: {
+                        normal: {
+                            show: false
+                        }
+                    },
+                    data: PSeries,
+
+                }
+            ]
+        };
+    };
+
+    //C3-4
+    window.onload = initPieCharts4();
+
+    function initPieCharts4() {
+        var dataValue = getPieData1();
+        var total = {
+            // name: '集宿区',
+            value: '3000'
+        };
+        var dataStyle = {
+            normal: {
+                label: {
+                    show: false
+                },
+                labelLine: {
+                    show: false
+                },
+                shadowBlur: 15,
+                shadowColor: 'white',
+            }
+        };
+        var option = GetPieTypeOption1(dataValue, total, dataStyle);
+
+        var dom = document.getElementById("C3-4");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+        tools.loopShowTooltip(myChart, option, {
+            loopSeries: true
+        });
+    }
+
+    //获取数据
+    function getPieData1() {
+        var dataValue = [
+            {value: 335, name: '东沙湖所'},
+            {value: 310, name: '湖东所'},
+            {value: 234, name: '湖西所'},
+            {value: 135, name: '娄葑所'},
+            {value: 400, name: '胜浦所'},
+            {value: 335, name: '唯亭所'},
+            {value: 310, name: '斜塘所'},
+            {value: 234, name: '半岛所'},
+            {value: 135, name: '永安桥所'},
+            {value: 548, name: '综保所'}
+        ];
+        return dataValue;
+    }
+
+    //option
+    function GetPieTypeOption1(dataValue, total, dataStyle) {
+        return {
+            //   backgroundColor:'#0C3053',
+//     tooltip: {
+//         show:true,
+//         trigger: 'item',
+//       // formatter: "{a} <br/>{b}: {c} ({d}%)",
+//         formatter: " {b}: {c} <br/> {d}%",
+// textStyle:{align:'center'}
+//     },
+            title: [{
+                text: total.name,
+                left: '50%',
+                top: '50%',
+                textAlign: 'center',
+                textBaseline: 'middle',
+                textStyle: {
+                    color: '#fff',
+                    fontWeight: 'normal',
+                    fontSize: 12
+                }
+            },
+                {
+                    text: total.value,
+                    left: '50%',
+                    top: '50%',
+                    textAlign: 'center',
+                    textBaseline: 'middle',
+                    textStyle: {
+                        color: '#A3F9FF',
+                        fontWeight: 'normal',
+                        fontSize: 14
+                    }
+                }],
+            series: [
+                {
+                    color: ['#3dd4de', '#047eca', '#4BB3D4', '#3b7186', '#2e8d94',
+                        '#3b64a6', '#2672cc', '#5d3ec5', '#0d9abb', '#00c0e9'
+                    ],
+                    name: '集宿区',
+                    type: 'pie',
+                    radius: ['40%', '55%'],
+                    //是否启用防止标签重叠策略，默认开启
+                    avoidLabelOverlap: true,
+                    itemStyle: dataStyle,
+                    label: {
+                        normal: {
+                            show: false,
+                            // position: 'outside',
+                            //  padding:[0,-10],
+                            //  formatter: '{b}: {c}\n  {d}%',
+                            formatter: '{b}\n{c}',
+                            textStyle: {
+                                color: "#777",
+                                // align:'center',
+                            }
+                        },
+                        emphasis: {
+                            show: true,
+                            padding: [0, -10],
+                            textStyle: {
+                                fontSize: '12',
+                                // fontWeight: 'bold',
+                                color: "#777",
+                                align: 'center'
+                            }
+                        }
+                    },
+                    labelLine: {
+                        normal: {
+                            show: false
+                        }
+                    },
+                    data: dataValue
+                },
+
+            ]
+        }
+    };
+
+    //C3-5
+    window.onload = initPieCharts5();
+
+    function initPieCharts5() {
+        var dataValue = getPieData2();
+        var dataStyle = {
+            normal: {
+                label: {
+                    show: false
+                },
+                labelLine: {
+                    show: false
+                },
+                shadowBlur: 40,
+                shadowColor: 'rgba(40, 40, 40, 0.5)',
+            }
+        };
+        var placeHolderStyle = {
+            normal: {
+                color: '#3a91d2', // 未完成的圆环的颜色
+                label: {
+                    show: false
+                },
+                labelLine: {
+                    show: false
+                }
+            },
+            emphasis: {
+                color: 'rgba(44,59,70,1)' // 未完成的圆环的颜色
+            }
+        };
+        var option0 = GetPieTypeOption2(dataValue.data1, dataValue.data2, dataStyle, placeHolderStyle);
+        var dom0 = document.getElementById("C3-5");
+        myChart0 = echarts.init(dom0);
+        chartDrew(option0, myChart0);
+        setInterval(function () {
+            myChart0.dispose();
+            $("#C3-5").html("");
+            myChart0 = echarts.init(dom0);
+            myChart0.setOption(option0);
+        }, 5000);
+    }
+
+    function getPieData2() {
+        var data1 = 35;
+        var data2 = 65;
+        return {data1: data1, data2: data2};
+    }
+
+    //option
+    function GetPieTypeOption2(data1, data2, dataStyle, placeHolderStyle) {
+        return {
+            // backgroundColor:'#0C3053',
+            tooltip: {
+                show: false,
+            },
+            toolbox: {
+                show: false,
+            },
+            // color : ['#3dd4de','#b697cd','#a6f08f'],
+            // backgroundColor: 'rgba(0,0,0,0.8)',
+            series: [{
+                name: '空关',
+                type: 'pie',
+                clockWise: false,
+                radius: [60, 65],
+                itemStyle: dataStyle,
+                //是否开启 hover 在扇区上的放大动画效果。
+                hoverAnimation: false,
+                center: ['50%', '50%'],
+                data: [{
+                    value: data1,
+                    label: {
+                        normal: {
+                            formatter: '{a}\n{c}%',
+                            position: 'center',
+                            show: true,
+                            textStyle: {
+                                fontSize: '15',
+                                fontWeight: 'normal',
+                                color: '#3dd4de'
+                            }
+                        }
+                    },
+                    // itemStyle: {
+                    //     normal: {
+                    //         color: '#3dd4de',
+                    //         shadowColor: '#3dd4de',
+                    //         shadowBlur: 10
+                    //     }
+                    // }
+                    itemStyle: {
+                        normal: {
+                            borderWidth: 5,
+                            //阴影长度
+                            shadowBlur: 30,
+                            borderColor: new echarts.graphic.LinearGradient(0, 0, 1, 1, [{
+                                offset: 0,
+                                color: '#7777eb'
+                            }, {
+                                offset: 1,
+                                color: '#70ffac'
+                            }]),
+                            shadowColor: 'rgba(142, 152, 241, 0.6)'
+                        }
+                    }
+                }, {
+                    value: data2,
+                    name: 'invisible',
+                    itemStyle: placeHolderStyle,
+                }]
+            },]
+        }
+    };
+
+    //C3-6
+    window.onload = initPieCharts6();
+
+    function initPieCharts6() {
+        var dataValue = getPieData3();
+        var dataStyle = {
+            normal: {
+                label: {
+                    show: true
+                },
+                labelLine: {
+                    show: true
+                },
+                shadowBlur: 15,
+                shadowColor: 'white',
+            }
+        };
+        var option = GetPieTypeOption3(dataValue, dataStyle);
+
+        var dom = document.getElementById("C3-6");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getPieData3() {
+        var dataValue = [{
+            value: 335,
+            name: '群1',
+        },
+            {
+                value: 310,
+                name: '群2'
+            },
+            {
+                value: 274,
+                name: '群3'
+            },
+            {
+                value: 235,
+                name: '群4'
+            },
+            {
+                value: 400,
+                name: '群5'
+            },
+            {
+                value: 279,
+                name: '群6'
+            },
+            {
+                value: 179,
+                name: '群7'
+            }
+        ];
+
+        return dataValue;
+    }
+
+    function GetPieTypeOption3(dataValue, dataStyle) {
+        return {
+            //    backgroundColor:'#0C3053',
+            color: ['#3dd4de', '#3b7186', '#d0a00e', '#0d9abb', '#5d3ec5', '#2672cc', '#3b64a6'],
+            //  backgroundColor: '#2c343c',
+
+            // tooltip: {
+            //     trigger: 'item',
+            //     formatter: "{a} <br/>{b} : {c} ({d}%)"
+            // },
+            //视觉映射组件
+            visualMap: {
+                show: false,
+                min: 80,
+                max: 600,
+                inRange: {
+                    colorLightness: [0, 1]
+                }
+            },
+            series: [{
+                name: '群租房',
+                type: 'pie',
+                radius: '70%',
+                center: ['50%', '50%'],
+                itemStyle: dataStyle,
+                data: dataValue.sort(function (a, b) {
+                    return a.value - b.value;
+                }),
+                //是否展示成南丁格尔图，通过半径区分数据大小
+                //'radius' 扇区圆心角展现数据的百分比，半径展现数据的大小。
+                //'area' 所有扇区圆心角相同，仅通过半径展现数据大小。
+                roseType: 'radius',
+                label: {
+                    normal: {
+                        formatter: '{b}\n{c}',
+                        textStyle: {
+                            color: '#777',
+
+                        }
+                    }
+                },
+                labelLine: {
+                    normal: {
+                        lineStyle: {
+                            color: 'rgba(255, 255, 255, 0.3)'
+                        },
+                        smooth: 0.2,
+                        length: 1,
+                        length2: 1
+                    }
+                },
+                // itemStyle: {
+                //     normal: {
+                //        // color: ['#85b6b2'],
+                //         shadowBlur: 200,
+                //         shadowColor: 'rgba(0, 0, 0, 0.5)'
+                //     }
+                // },
+
+                // animationType: 'scale',
+                // animationEasing: 'elasticOut',
+                // animationDelay: function(idx) {
+                //     return Math.random() * 200;
+                // }
+            }]
+        };
+    }
+
+    //C3-7
+    window.onload = initPieCharts7();
+
+    function initPieCharts7() {
+        var echartData = getPieData4();
+        var scale = 1;
+        var rich = {
+            yellow: {
+                color: "#ffc72b",
+                fontSize: 30 * scale,
+                padding: [5, 4],
+                align: 'center'
+            },
+            total: {
+                color: "#00C6FF",
+                fontSize: 30 * scale,
+                fontFamily: '方正大黑',
+                fontWeight: 'bold',
+                align: 'center'
+            },
+            white: {
+                color: "#fff",
+                align: 'center',
+                fontSize: 14 * scale,
+                padding: [21, 0]
+            },
+            blue: {
+                color: '#49dff0',
+                fontSize: 16 * scale,
+                align: 'center'
+            },
+            hr: {
+                borderColor: '#0b5263',
+                width: '100%',
+                borderWidth: 1,
+                height: 0,
+            }
+        }
+        var option = GetPieTypeOption4(echartData, rich, scale);
+        var dom = document.getElementById("C3-7");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getPieData4() {
+        var dataValue = [
+            {value: 3, name: '未知'},
+            {value: 6, name: '警告'},
+            {value: 2, name: '严重'},
+            {value: 1, name: '致命'}
+
+        ]
+        return dataValue;
+    }
+
+    function GetPieTypeOption4(echartData, rich, scale) {
+        return {
+            //  backgroundColor: '#020933',
+            tooltip: {
+                trigger: 'item',
+                formatter: "{b}: {c} ({d}%)",
+
+            },
+            title: {
+                text: '总告警数',
+                left: 'center',
+                top: '53%',
+                padding: [10, 0],
+                textStyle: {
+                    color: '#85b6b2',
+                    fontSize: 12 * scale,
+                    align: 'center'
+                }
+            },
+            legend: {
+                //图例选择的模式
+                selectedMode: false,
+                formatter: function (name) {
+                    var total = 0; //各科正确率总和
+                    var averagePercent; //综合正确率
+                    echartData.forEach(function (value, index, array) {
+                        total += value.value;
+                    });
+                    return '{total|' + total + '}';
+                },
+                data: [echartData[0].name],
+                // data: ['高等教育学'],
+                // itemGap: 50,
+                left: 'center',
+                top: 'center',
+                icon: 'none',
+                align: 'center',
+                textStyle: {
+                    color: "#fff",
+                    fontSize: 16 * scale,
+                    rich: rich
+                },
+            },
+            series: [
+                {
+                    name: '访问来源',
+                    type: 'pie',
+                    //是否开启 hover 在扇区上的放大动画效果。
+                    hoverAnimation: false,
+                    //是否启用图例 hover 时的联动高亮。
+                    legendHoverLink: false,
+                    //饼图的半径，数组的第一项是内半径，第二项是外半径。
+                    radius: ['50%', '55%'],
+                    // color: ['#915872', '#3077b7', '#9a8169', '#3f8797','#5b8144','#307889','#9c6a79'],
+                    label: {
+                        normal: {
+                            position: 'inner'
+                        }
+                    },
+                    labelLine: {
+                        normal: {
+                            show: false
+                        },
+
+                    },
+                    tooltip: {
+                        show: false,
+
+
+                    },
+
+                    data: [
+                        {
+                            value: 0,
+                            itemStyle: {
+                                normal: {
+                                    color: '#ccc',
+                                    shadowBlur: 50,
+                                    shadowColor: 'white',
+                                    show: true
+                                }
+                            }
+                        }
+
+                    ]
+                },
+                {
+                    // name:'访问来源',
+                    type: 'pie',
+                    radius: ['52%', '70%'],
+                    color: ['#00acee', '#52cdd5', '#79d9f1', '#cd5e7e', '#60a900', '#01949b', ' #f17677'],
+                    label: {
+                        normal: {
+                            padding: [0, -10],
+                            formatter: '{b}\n{c}'
+                        },
+
+                    },
+                    labelLine: {
+                        normal: {
+                            show: false
+                        },
+                    },
+                    data: echartData
+                }
+            ]
+        };
+    }
+
+    //C3-8
+    window.onload = initPieCharts8();
+
+    function initPieCharts8() {
+        var echartData = getPieData5();
+        var option = GetPieTypeOption5(echartData);
+        var dom = document.getElementById("C3-8");
+        myChart = echarts.init(dom);
+        chartDrew(option, myChart);
+    }
+
+    function getPieData5() {
+        var dataValue = [{
+            value: 75
+
+        }, {
+            value: 25,
+            label: {
+                normal: {
+                    show: false
+                }
+            }
+        }]
+        return dataValue;
+    }
+
+    function GetPieTypeOption5(echartData) {
+        return {
+            // title: {
+            //     text: '及时率',
+            //     x: '50%',
+            //     y: '45%',
+            //     textAlign: "center",
+            //     textStyle: {
+            //         fontWeight: 'normal',
+            //         fontSize: 12,
+            //          color: '#fff'
+            //     },
+            //     subtextStyle: {
+            //         fontWeight: 'bold',
+            //         fontSize: 32,
+            //         color: '#fff'
+            //     }
+            // },
+            series: [{
+                name: ' ',
+                type: 'pie',
+                radius: ['50%', '70%'],
+                //起始角度
+                startAngle: 225,
+                color: [new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                    offset: 0,
+                    color: '#00a2ff'
+                }, {
+                    offset: 1,
+                    color: '#70ffac'
+                }]), "transparent"],
+                //是否开启 hover 在扇区上的放大动画效果。
+                hoverAnimation: false,
+                //是否启用图例 hover 时的联动高亮。
+                legendHoverLink: false,
+                //是否启用防止标签重叠策略
+                "avoidLabelOverlap": false,
+                label: {
+                    normal: {
+                        formatter: '及时率\n{c}%',
+                        position: 'center',
+                        show: true,
+                        textStyle: {
+                            fontSize: '15',
+                            fontWeight: 'normal',
+                            color: '#3dd4de'
+                        }
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        borderColor: "transparent",
+                        borderWidth: "20"
+                    },
+                    emphasis: {
+                        borderColor: "transparent",
+                        borderWidth: "20"
+                    }
+                },
+                z: 10,
+                labelLine: {
+                    normal: {
+                        show: false
+                    }
+                },
+                data: echartData
+            }
+                // , {
+                //     name: '',
+                //     type: 'pie',
+                //     radius: ['50%', '70%'],
+                //     startAngle: 225,
+                //     color: ["#c2f5e1", "transparent"],
+                //     labelLine: {
+                //         normal: {
+                //             show: false
+                //         }
+                //     },
+                //     data: [{
+                //         value: 75
+                //     }, {
+                //         value: 25
+                //     }]
+                // }
+
+            ]
+        };
+    }
+
+
+    <!-- 饼图 end-->
+</script>
+</html>

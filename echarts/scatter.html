@@ -1,0 +1,416 @@
+<!doctype html>
+<html class="no-js" lang="">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title></title>
+  <link rel="stylesheet" href="../js/easyUI/icon.css">
+  <link rel="stylesheet" href="../js/easyUI/easyui.css">
+  <link rel="stylesheet" href="../js/easyUI/demo.css">
+  <link rel="stylesheet" href="../js/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/common_mdsd.css">
+  <link rel="stylesheet" href="../css/font.css">
+  <script src="../js/bootstrap-3.3.7-dist/js/jquery1.9.1.js"></script>
+  <script src="../js/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+  <script src="../js/easyUI/jquery.easyui.min.js"></script>
+  <script src="../js/echarts.js"></script>
+ <script src="../js/index_tab_yl.js"></script>
+ <script src="../js/data.js"></script>
+  <style>
+    .child_menu {width: 32.4%;height: 220px;margin-bottom: 10px;border-color:#ddd}
+    pre{height: 500px;display:none;color:black;font-size: 16px;background: white}
+    pre.on{display: block}
+    .child_menu:hover{opacity: 0.6;}
+    .preRemove{position: relative;top: 28px;right: -97%;color: #b02f25;font-size: 17px;display: none;width: 0;}
+    .preRemove:hover{color: red;}
+  </style>
+
+</head>
+
+<body id="contain" class="container-fluid bodyStyle" >
+  <div style="padding-top: 20px;padding-left: 30px;">
+    <div class="title_grad">
+      <div></div><p>散点图</p>
+    </div>
+    <div style="width: 100%;">
+      <div class="child_menu">
+        <!-- scatter-->
+        <div id="C4-1" style="width:100%;height:220px;"></div>
+      </div>
+    </div>
+    <div><span class="glyphicon glyphicon-remove preRemove"></span>
+      <pre  class="C4-1">
+    // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+           //C4-1 Scatter
+    window.onload=initScatterCharts1();
+    function initScatterCharts1(){
+        var ksTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/CHJB.cda&dataAccessId=ks1_ds";
+        var ksTypeJSON = readJSONFile(ksTypeUrl).resultset;
+        // console.log(ksTypeJSON);
+        var outletUrl =  "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/CHJB.cda&dataAccessId=chjb_ds";
+        // outletUrl += "&amp;paramtimestart=" + timestart + "&amp;paramgetsx=" + getsx;
+        outletUrl += "&amp;paramtimestart=" + '20180601"' + "&amp;paramgetsx=" + "ALL";
+        var outletJSON = readJSONFile(outletUrl).resultset;
+        var data1 = BarDataEncapsulation5(ksTypeJSON);
+        var data2 = BarDataEncapsulation5(outletJSON);
+        chartDrew(GetOutletOption5(data2.xAxis, data2.series,data2.series2),  // option
+            echarts.init(document.getElementById("C4-1")) //chart
+        )
+    }
+    // 封装数据
+    function BarDataEncapsulation5(cdaData){
+        // 柱状图的X轴属性
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr[i] = cdaData[i][0];
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴1的值（欠费）
+        var series=
+            (function(){
+                var tempArr=cdaData;
+                return tempArr;
+            })();
+        // 柱状图的X轴2的值（未欠费）
+        var series2=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr[i] = cdaData[i];
+                }
+                return tempArr;
+            })();
+        return {
+            xAxis : xAxis,
+            series : series,
+            series2 :series2
+        };
+    };
+    // option
+    function GetOutletOption5 (XLegends,XDatas1,XDatas2){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter : function (params) {
+                    return params.value[0] + '&lt;br/&gt;'
+                        + params.value[2] +  ':&lt;br/&gt;'
+                        +'疾病：'+params.value[1] ;
+                },
+            },
+            //图例组件。
+            legend: {
+                data:['疾病']
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    name : "科室",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    data : XLegends,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval : 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 30,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                            fontSize : 12
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系内绘图网格
+            grid : {    //控制图的大小
+                //grid 组件离容器左侧的距离。
+                left : 70,
+                //grid 组件离容器上侧的距离。
+                top : 70,
+                y2 : 70    //y2可以控制X轴跟Zoom控件之间的间隔，避免以为倾斜后造成label重叠到Zoom上
+            },
+            yAxis : [
+                {
+                    name : "数量",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false
+                    }
+                }
+            ],
+            //图例列表
+            series : [
+                {
+                    name : "疾病",
+                    type : 'scatter',
+                    //图形样式。
+                    itemStyle : {
+                        normal : {
+                            // color:"rgba(98, 153, 204, 0.66)",
+                            color:"rgba(98, 204, 100, 0.51)",
+                            label : {
+                                show : false,
+                            },
+                            //圆角半径
+                            barBorderRadius:0,
+                        },
+                        //高亮的扇区和标签样式。
+                        emphasis: {
+                            color:"#99CCFF",//曲线颜色
+                            label : {
+                                show : true,
+                                textStyle: {
+                                    color:"#777"
+                                }
+                            },
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        },
+
+                    },
+                    //标记的大小
+                    symbolSize: 20,
+                    data : XDatas1
+                }
+            ]
+        };
+    };
+        </pre>
+    </div>
+  </div>
+  <div>
+
+  </div>
+</body>
+<script>
+    $(document).on('click','.child_menu p',function(event){
+        event.stopPropagation();
+        if(typeof($(this).attr("data-url"))=="undefined"){console.log("没有链接")
+        }else{
+            var url=$(this).attr("data-url");var title=$(this).text();
+            parent.window.addTab(title,url);
+        }
+    });
+    $('.child_menu>div').click(function () {
+        $('pre').parent().children('span').css({display:'none'});
+        $('.child_menu>div').parent().css({'border-color':'#ddd'});
+        $(this).parent().css({'border-color':'#5497f2'});
+        var id=$(this)[0].id;
+        $('pre').removeClass('on');
+        $('.'+id).addClass('on');
+        $('.'+id).parent().children('span').css({display:'block'});
+    });
+  $('.preRemove').click(function () {
+      $('pre.on').parent().children('span').css({display:'none'});
+      $('pre.on').removeClass('on');
+  })
+</script>
+<script>
+    // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+    <!-- Scatter start-->
+    //C4-1 Scatter
+    window.onload=initScatterCharts1();
+    function initScatterCharts1(){
+        var ksTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/CHJB.cda&dataAccessId=ks1_ds";
+        // var ksTypeJSON = readJSONFile(ksTypeUrl).resultset;
+        // console.log(ksTypeJSON);
+        var outletUrl =  "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/CHJB.cda&dataAccessId=chjb_ds";
+        // outletUrl += "&paramtimestart=" + timestart + "&paramgetsx=" + getsx;
+        outletUrl += "&paramtimestart=" + '20180601"' + "&paramgetsx=" + "ALL";
+
+        // var outletJSON = readJSONFile(outletUrl).resultset;
+        // var data1 = BarDataEncapsulation5(ksTypeJSON);
+        // var data2 = BarDataEncapsulation5(outletJSON);
+        var data2 = getData2();
+        chartDrew(GetOutletOption5(data2.xAxis, data2.series,data2.series2),  // option
+            echarts.init(document.getElementById("C4-1")) //chart
+        )
+
+    }
+    // 封装数据
+    function BarDataEncapsulation5(cdaData){
+        // 柱状图的X轴属性
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr[i] = cdaData[i][0];
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴1的值（欠费）
+        var series=
+            (function(){
+                var tempArr=cdaData;
+                return tempArr;
+            })();
+        // 柱状图的X轴2的值（未欠费）
+        var series2=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr[i] = cdaData[i];
+                }
+                return tempArr;
+            })();
+        return {
+            xAxis : xAxis,
+            series : series,
+            series2 :series2
+        };
+    };
+    // option
+    function GetOutletOption5 (XLegends,XDatas1,XDatas2){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter : function (params) {
+                    return params.value[0] + '<br/>'
+                        + params.value[2] +  ':<br/>'
+                        +'疾病：'+params.value[1] ;
+                },
+            },
+            //图例组件。
+            legend: {
+                data:['疾病']
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    name : "科室",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    data : XLegends,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval : 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 30,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                            fontSize : 12
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系内绘图网格
+            grid : {    //控制图的大小
+                //grid 组件离容器左侧的距离。
+                left : 70,
+                //grid 组件离容器上侧的距离。
+                top : 70,
+                y2 : 70    //y2可以控制X轴跟Zoom控件之间的间隔，避免以为倾斜后造成label重叠到Zoom上
+            },
+            yAxis : [
+                {
+                    name : "数量",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false
+                    }
+                }
+            ],
+            //图例列表
+            series : [
+                {
+                    name : "疾病",
+                    type : 'scatter',
+                    //图形样式。
+                    itemStyle : {
+                        normal : {
+                            // color:"rgba(98, 153, 204, 0.66)",
+                            color:"rgba(98, 204, 100, 0.51)",
+                            label : {
+                                show : false,
+                            },
+                            //圆角半径
+                            barBorderRadius:0,
+                        },
+                        //高亮的扇区和标签样式。
+                        emphasis: {
+                            color:"#99CCFF",//曲线颜色
+                            label : {
+                                show : true,
+                                textStyle: {
+                                    color:"#777"
+                                }
+                            },
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        },
+
+                    },
+                    //标记的大小
+                    symbolSize: 20,
+                    data : XDatas1
+                }
+            ]
+        };
+    };
+    <!-- Scatter end-->
+</script>
+</html>

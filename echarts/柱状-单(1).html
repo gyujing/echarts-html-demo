@@ -1,0 +1,2873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../js/bootstrap-3.3.7-dist/js/jquery1.9.1.js"></script>
+    <script src="../js/echarts.js"></script>
+    <script src="../js/data.js"></script>
+</head>
+<body>
+<!-- 柱形图-->
+<div id="C1-1" style="width:100%;height:220px;"></div>
+<!-- 堆叠柱形图-->
+<div id="C1-2" style="width:100%;height:220px;"></div>
+<!-- 折线、柱状混合-双轴-->
+<div id="C1-3" style="width:100%;height:220px;"></div>
+<!--  折线、柱形图混合堆叠-双轴-->
+<div id="C1-4" style="width:100%;height:220px;"></div>
+<!-- 堆叠条形码-->
+<div id="C1-5" style="width:100%;height:220px;"></div>
+<!-- 堆叠柱形图-->
+<div id="C1-6" style="width:100%;height:220px;"></div>
+
+<!-- 基础折线图-->
+<div id="C2-1" style="width:100%;height:220px;"></div>
+<!-- 折线图堆叠-单轴-->
+<div id="C2-2" style="width:100%;height:220px;"></div>
+<!-- 折线图堆叠-双轴-->
+<div id="C2-3" style="width:100%;height:220px;"></div>
+
+<div style="width:100%;height:222px;">
+    <!-- 饼图-->
+    <div id="C3-1" style="width:50%;height:220px;float: left"></div>
+    <!-- 饼图带图标-->
+    <div id="C3-2" style="width:50%;height:220px;float: left"></div>
+</div>
+<div style="width:100%;height:222px;">
+    <!-- 饼图3-->
+    <div id="C3-3" style="width:50%;height:220px;float: left"></div>
+</div>
+
+<!-- Scatter-->
+<div id="C4-1" style="width:100%;height:220px;"></div>
+</body>
+<script>
+
+    // 请求接口
+    function readJSONFile(url){
+        var jsonData;
+        $.ajax({
+            type : 'GET', url : url, async : false, dataType : 'json', data : null,
+            success : function(response){jsonData = response;}
+        });
+        return jsonData;
+    }
+    // 绘制图表
+    function chartDrew(option,chart){
+        chart.setOption(option);
+        window.addEventListener('resize',function () {chart.resize();})
+    }
+
+    <!-- 柱状 start-->
+
+    //C1-1 柱形图
+    window.onload=initBarCharts1();
+    function initBarCharts1(){
+        var itemCategoryUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/CHJB.cda&dataAccessId=bar_ds4";
+        // itemCategoryUrl += "&parambutton_event=" + button_event + "&paramoutletParam=" + outletParam;
+
+        // var data = BarDataEncapsulation1(readJSONFile(itemCategoryUrl).resultset);
+        var data = getData1();
+        chartDrew(GetOutletOption1(data.xAxis,data.series),  // option
+            echarts.init(document.getElementById("C1-1")) //chart
+        );
+    }
+    // 封装数据
+    function BarDataEncapsulation1 (cdaData){
+        // 柱状图的X轴属性
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        selected : true
+                    });
+                    tempArr[i] = cdaData[i][0];
+                }
+                return tempArr;
+            })()
+
+        //柱状图的X轴的值
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr.push({
+                        'name' :  cdaData[i][0],
+                        'value'  : cdaData[i][1],
+                        selected : true
+                    });
+                }
+                return tempArr;
+            })();
+        return {xAxis : xAxis, series :series};
+    };
+    // option
+    function GetOutletOption1 (XLegends,XDatas){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger : 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter: function(params) {
+                    var res = "疾病大类：" + params.name + '<br/>' + "数量：" + params.value ;
+                    //var res = "人次：" + params.value ;
+                    return res;
+                }
+            },
+            //是否显示拖拽用的手柄,default: false
+            calculable : true,
+            //直角坐标系 grid 中的 x 轴
+            //直角坐标系内绘图网格
+            grid:{
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '2%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '5%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    //坐标轴名称。
+                    name : "疾病大类",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    //是否显示 x 轴。default: true
+                    show : true,
+                    //类目数据
+                    data : XLegends,
+                    //x坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval : 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 15,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            fontSize : 10,
+                            color:"#777"
+                        }
+                    },
+                    //x坐标轴轴线相关设置。
+                    axisLine : {
+                        //是否显示x坐标轴轴线。default: true
+                        show : true,
+                        //x坐标轴线线样式
+                        lineStyle:{
+                            color : "#60b9e3"
+                        }
+                    },
+                    //x坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        //是否显示分隔线。是否显示分隔线
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系 grid 中的 y 轴
+            yAxis : [
+                {
+                    //坐标轴名称。
+                    name : "数量",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //是否显示 y 轴。default: true
+                    show : true,
+                    //数据展示的小数精度。
+                    precision: 2,
+                    //是否是脱离 0 值比例。设置成 true 后坐标刻度不会强制包含零刻度。 default: false
+                    scale : true,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter: '{value}',
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //y坐标轴轴线相关设置。
+                    axisLine : {
+                        //是否显示x坐标轴轴线。default: true
+                        show : true,
+                        //y坐标轴线线样式
+                        lineStyle:{
+                            color : "#60b9e3"
+                        }
+                    },
+                    //y坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        //是否显示分隔线。是否显示分隔线
+                        show: true,
+                        //分隔线
+                        lineStyle:{
+                            //分隔线颜色
+                            color:'#eee'
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔区域，默认不显示。
+                    splitArea:{
+                        //是否显示分隔区域。default: false
+                        show:true,
+                        //分隔区域的样式设置。
+                        areaStyle:{
+                            color:['#f4f8fa','#ffffff']
+                        }
+                    }
+                }
+            ],
+            //系列列表
+            series : [
+                {
+                    //系列名称
+                    name : "疾病大类",
+                    //组件
+                    type : 'bar',
+                    //数据展示的小数精度。
+                    precision: 2,
+                    //柱条的宽度
+                    barWidth : 40,//柱图宽度
+                    //图形样式
+                    itemStyle: {
+                        normal: {
+                            // 柱条的颜色
+                            color: '#5497f2',
+                            // shadowColor: 'rgba(0, 0, 0, 0.4)',
+                            //shadowBlur: 20
+                            //图形上的文本标签
+                            label: {
+                                //是否显示标签。
+                                show: true,
+                                //标签的位置。可选：[x, y]，top，left，right，buttom，inside等
+                                position: 'top',
+                                //标签内容格式器
+                                //{a}：系列名。{b}：数据名。{c}：数据值。{@xxx}：数据中名为'xxx'的维度的值,{@[n]}：数据中维度n的值
+                                formatter: '{c}'
+                            }
+                        }
+                    },
+                    //系列中的数据内容数组
+                    data : XDatas,
+
+                },
+            ]
+        };
+    };
+
+    //C1-2 堆叠柱形图
+    window.onload=initBarCharts2();
+    function initBarCharts2(){
+        var jcTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=bar_ds22";
+        //jcTypeUrl += "&paramtimestart=" + timestart +"&paramtimeend=" + timeend;
+
+        // var jcTypeJSON = readJSONFile(jcTypeUrl).resultset;
+        // var data = barDoubleDataEncapsulation22(jcTypeJSON);
+        var data = getData3();
+        chartDrew(GetBarTypeOption22(data.xAxis,data.series,data.series2,data.series3),  // option
+            echarts.init(document.getElementById("C1-2")) //chart
+        );
+    }
+    // 封装数据
+    function barDoubleDataEncapsulation22(cdaData){
+        //获取柱状图的X轴属性
+        var xAxis =
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i <cdaData.length/3; i++){
+
+                    tempArr[i] = cdaData[i][1];
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴的值1
+        var series =
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+
+                    if(cdaData[i][0]=='2016'){
+                        tempArr.push({
+                            'name' : cdaData[i][1],
+                            'value'  : cdaData[i][2],
+                            selected : true
+                        });
+                    }
+                }
+                //alert(tempArr);
+                return tempArr;
+            })();
+        //柱状图的X轴的值2
+        var series2 =
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    if(cdaData[i][0]=='2017'){
+                        tempArr.push({
+                            'name' : cdaData[i][1],
+                            'value'  : cdaData[i][2],
+                            selected : true
+                        });
+                    }
+                }
+                return tempArr;
+            })();
+        var series3 =
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    if(cdaData[i][0]=='2015'){
+                        tempArr.push({
+                            'name' : cdaData[i][1],
+                            'value'  : cdaData[i][2],
+                            selected : true
+                        });
+                    }
+                }
+                return tempArr;
+            })();
+        return {
+            xAxis : xAxis,
+            series1 : series,
+            series2 : series2,
+            series3 : series3
+        };
+    };
+    // option
+    function GetBarTypeOption22(XLegends,XDatas1,XDatas2,XDatas3){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'axis'
+            },
+            //图例组件。
+            legend: {
+                //图例的数据数组
+                data:['2016','2017','2015']
+            },
+            //直角坐标系内绘图网格
+            grid:{
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '4%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    //是否显示 x 轴。default: true
+                    show : true,
+                    //类目数据
+                    data : XLegends,
+                    //x坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval : 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 20,
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                        }
+                    },
+                    //x坐标轴轴线相关设置。
+                    axisLine : {
+                        //是否显示x坐标轴轴线。default: true
+                        show : true,
+                        interval : 0,
+                        //x坐标轴线线样式
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //x坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        //是否显示分隔线。
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系 grid 中的 y 轴
+            yAxis : [
+                {
+                    //坐标轴名称。
+                    name : "数量",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter : function(value){
+                            if(value !== 0){
+                                return value;
+                            }else if(value === ""){
+                                return 0;
+                            }else{
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //y坐标轴轴线相关设置。
+                    axisLine : {
+                        //是否显示x坐标轴轴线。default: true
+                        show : true,
+                        //y坐标轴线线样式
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //y坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        //是否显示分隔线。是否显示分隔线
+                        show: false
+                    }
+                }
+            ],
+            //系列列表
+            series : [
+                {
+                    //系列名称
+                    name : "2016",
+                    //组件类型
+                    type : 'bar',
+                    //图形样式
+                    itemStyle : {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color: "rgb(154, 188, 195)",
+                            // barBorderRadius: 10,
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+
+                        },
+                        normal : {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color:"#1885bd"
+                        },
+                    },
+                    //系列中的数据内容数组
+                    data : XDatas1
+                },
+                {
+                    //系列名称
+                    name : "2017",
+                    //组件类型
+                    type : 'bar',
+                    //图形样式
+                    itemStyle : {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:"rgb(168, 227, 215)",
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+
+                        },
+                        normal : {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color:"#99ccff"
+                        }
+                    },
+                    //系列中的数据内容数组
+                    data : XDatas2
+                }  ,
+                {
+                    //系列名称
+                    name : "2015",
+                    //组件类型
+                    type : 'bar',
+                    //图形样式
+                    itemStyle : {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:"rgb(108, 207, 205)",
+                            // barBorderRadius: 10,
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        },
+                        normal : {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color:"#99d2dd"
+                        }
+                    },
+                    //系列中的数据内容数组
+                    data : XDatas2
+                }
+            ]
+        };
+    };
+
+    //C1-3 折线、柱形混合图
+    window.onload=initBarCharts3();//加载图表
+    function initBarCharts3(){
+        var lineTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/YZSY_1.cda&dataAccessId=C11_DS";
+        // lineTypeUrl+="&paramtimestart2=" + timestart2+ "&paramtimeend2=" + timeend2 + "&paramgetks2=" + getks2;
+        lineTypeUrl+="&paramtimestart2=" + "20180526"+ "&paramtimeend2=" + "20180626" + "&paramgetks2=" + "ALL";
+        var lineTypeUrl1 = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/YZSY_1.cda&dataAccessId=C1_DS";
+        // lineTypeUrl1+="&paramtimestart2=" + timestart2+ "&paramtimeend2=" + timeend2 + "&paramgetks2=" + getks2;
+        lineTypeUrl1+="&paramtimestart2=" + "20180526"+ "&paramtimeend2=" + "20180626" + "&paramgetks2=" + "ALL";
+        // var lineTypeJSON = readJSONFile(lineTypeUrl).resultset;
+        // var lineTypeJSON1 = readJSONFile(lineTypeUrl1).resultset;
+        // var data = LineMixBarDataEncapsulation(lineTypeJSON,lineTypeJSON1);
+        var data = getData2();
+        chartDrew(GetLineMixBarTypeOption(data.xAxis,data.series,data.series2),  // option
+            echarts.init(document.getElementById("C1-3")) //chart
+        );
+    }
+    //封装数据
+    function LineMixBarDataEncapsulation(cdaData1,cdaData2){
+        // line的X轴属性
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData1.length; i++){
+                    tempArr.push({
+                        'name' : cdaData1[i][0],
+                        selected : true
+                    });
+                    tempArr[i] = cdaData1[i][0];
+                }
+                return tempArr;
+            })();
+        //line的X轴1的值
+        var series =
+            (function(){
+                var tempArr1 = [];
+                for(var i = 0; i < cdaData1.length; i++){
+                    tempArr1.push({
+                        'name' : cdaData1[i][0],
+                        'value'  : cdaData1[i][1],
+                        selected : true
+                    });
+                }
+                return tempArr1;
+            })();
+        //line的X轴2的值
+        var series2 =
+            (function(){
+                var tempArr2 = [];
+                for(var i = 0; i < cdaData2.length; i++){
+                    tempArr2.push({
+                        'name' : cdaData2[i][0],
+                        'value'  : cdaData2[i][1],
+                        selected : true
+                    });
+                }
+                return tempArr2;
+            })();
+        return {
+            xAxis : xAxis,
+            series : series,
+            series2 : series2
+        };
+    };
+    //option
+    function GetLineMixBarTypeOption (XLegends,XDatas1,XDatas2){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'axis',
+                //提示框浮层的背景颜色。
+                backgroundColor:'#fff',
+                //提示框浮层的边框颜色。
+                borderColor:'grey',
+                //提示框浮层的文本样式。
+                textStyle:{
+                    color:'grey'
+                }
+            },
+            //图例组件。
+            legend:{
+                //图例的数据数组
+                data:['人次','收入'],
+            },
+            //直角坐标系内绘图网格
+            grid: {
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '1.5%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    //是否显示 x 轴。default: true
+                    show : true,
+                    //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样。
+                    boundaryGap : true,
+                    //类目数据
+                    data : XLegends,
+                    //x坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval:0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate:45,
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                            fontSize:12
+                        }
+                    },
+                    //x坐标轴轴线相关设置。
+                    axisLine : {
+                        //是否显示x坐标轴轴线。default: true
+                        show : true,
+                        //x坐标轴线线样式
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        //是否显示坐标轴刻度。
+                        show:false
+                    },
+                    //x坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        //是否显示分隔线。是否显示分隔线
+                        show: false,
+                        //x坐标轴线线样式
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    }
+                }
+            ],
+            //直角坐标系 grid 中的 y 轴
+            yAxis : [
+                {
+                    //坐标轴名称。
+                    name : "人次",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //数据展示的小数精度。
+                    precision: 2,
+                    //是否是脱离 0 值比例。设置成 true 后坐标刻度不会强制包含零刻度。 default: false
+                    scale : true,
+                    //坐标轴刻度最小值。
+                    min:0,
+                    //y 轴的位置。
+                    position: 'left',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter : function(value){
+                            if(value !== 0){
+                                return value;
+                            }else if(value === ""){
+                                return 0;
+                            }else{
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //y坐标轴轴线相关设置。
+                    axisLine : {
+                        //是否显示x坐标轴轴线。default: true
+                        show : true,
+                        //y坐标轴线线样式
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        //是否显示坐标轴刻度。
+                        show:false
+                    },
+                    //y坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        //是否显示分隔线。
+                        show: false,
+                        //分隔线样式
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    },
+                },
+                {
+                    name : "收入",
+                    type : 'value',
+                    //坐标轴刻度最小值。
+                    min:0,
+                    precision: 2,
+                    //是否是脱离 0 值比例。设置成 true 后坐标刻度不会强制包含零刻度。 default: false
+                    scale : true,
+                    position:'right',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        formatter : function(value){
+                            if(value !== 0){
+                                return value;
+                            }else if(value === ""){
+                                return 0;
+                            }else{
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        show:false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    },
+                }
+            ],
+            //系列列表
+            series : [
+                {
+                    //系列名称
+                    name : "收入",
+                    //组件
+                    type : 'line',
+                    //标记的图形。default: 'emptyCircle',
+                    //包括 'circle', 'rect', 'roundRect', 'triangle', 'diamond', 'pin', 'arrow'
+                    symbol:'diamond',
+                    //标记的大小
+                    symbolSize:5,
+                    //是否平滑曲线显示。default: false
+                    smooth: true,
+                    //使用的 y 轴的 index
+                    yAxisIndex: 1,
+                    //折线拐点标志的样式。
+                    itemStyle: {
+                        normal: {
+                            color:"#ff7f36",
+                        },
+                        //图形的高亮样式。
+                        emphasis: {
+                            color:"#ff7f36",
+                        }
+                    },
+                    ////系列中的数据内容数组
+                    data : XDatas1
+                },
+                {
+                    name : "人次",
+                    type : 'bar',
+                    //图标标记
+                    markPoint :{
+                        //标记的图形
+                        symbol:'circle',//拐点样式
+                        //标记的大小
+                        symbolSize:50,//拐点大小
+                    },
+                    //图形样式
+                    itemStyle: {
+                        normal: {
+                            color:"#1790cf ",//曲线颜色
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:"#1790cf ",//曲线颜色
+                        }
+                    },
+                    data : XDatas2
+                }
+            ]
+        };
+    };
+
+    // C1-4 折线、柱形图混合堆叠-双轴~
+    window.onload=initBarCharts4();//加载图表
+    function initBarCharts4(){
+        var url = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=line1";
+        var url2 = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=line11";
+        var url3 = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=line111";
+        // url += "&parambutton_event=" + button_event + "&paramoutletParam=" + outletParam;
+        // var json = readJSONFile(url).resultset;
+        // var data=getBarDataTwo(readJSONFile(url).resultset,readJSONFile(url2).resultset,readJSONFile(url3).resultset);
+        var data = getData1();
+        chartDrew(getBarOptionTwo(data.xAxis,data.series,data.series2,data.series3),  // option
+            echarts.init(document.getElementById("C1-4")) //chart
+        );
+    }
+    // 封装数据
+    function getBarDataTwo(json,json2,json3){
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < json.length; i++){tempArr.push({'name' : json[i][0], selected : true});tempArr[i] = json[i][0];}
+                return tempArr;
+            })();
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < json.length; i++){tempArr.push({'name' : json[i][0], 'value'  : json[i][1], selected : true});}
+                return tempArr;
+            })();
+        var series2=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < json2.length; i++){tempArr.push({'name' : json2[i][0], 'value'  : json2[i][1], selected : true});}
+                return tempArr;
+            })();
+        var series3=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < json3.length; i++){tempArr.push({'name' : json3[i][0], 'value'  : json3[i][1], selected : true});}
+                return tempArr;
+            })();
+        return {xAxis : xAxis, series :series, series2 :series2, series3 :series3};
+    }
+    // option
+    function getBarOptionTwo(xAxis,series,series2,series3){
+        return {
+            //提示框组件
+            tooltip : {
+                trigger: 'axis',
+                //提示框浮层的背景颜色。
+                backgroundColor:'#fff',
+                //提示框浮层的边框颜色。
+                borderColor:'grey',
+                //提示框浮层的文本样式。
+                textStyle:{
+                    color:'grey'
+                }
+            },
+            //图例组件。
+            legend:{
+                data:['预约人次','应诊人次','应诊率'],
+                // y:'bottom'
+            },
+            //直角坐标系内绘图网格
+            grid:{
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '4%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    show : true,
+                    //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样。
+                    boundaryGap : true,
+                    data : xAxis,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval:0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate:40,
+                        //刻度标签与轴线之间的距离。
+                        margin:5,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        show:false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        //是否显示x坐标轴轴线。default: true
+                        show: false,
+                        //x坐标轴线线样式
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    }
+                }
+            ],
+            yAxis : [
+                {
+                    //坐标轴名称。
+                    name : "人次",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //数据展示的小数精度。
+                    precision: 2,
+                    //是否是脱离 0 值比例。设置成 true 后坐标刻度不会强制包含零刻度。 default: false
+                    scale : true,
+                    //y 轴的位置。
+                    position: 'left',
+                    //坐标轴刻度最小值。
+                    min:0,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //度标签的内容格式器，支持字符串模板和回调函数两种形式。
+                        formatter : function(value){
+                            if(value !== 0){
+                                return value;
+                            }else if(value === ""){
+                                return 0;
+                            }else{
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        show:false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    },
+                    // splitArea: {show: true
+                    // ,backgroundColor: 'rgba(252, 252, 252, 0.2)'}
+                },
+                {
+                    //坐标轴名称。
+                    name : "应诊率",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //  precision: 2,
+                    // scale : true,
+                    //y 轴的位置。
+                    position:'right',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //度标签的内容格式器，支持字符串模板和回调函数两种形式。
+                        formatter : function(value){
+                            if(value !== 0){
+                                return value+'%';
+                            }else if(value === ""){
+                                return 0;
+                            }else{
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        show:false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    },
+                }
+            ],
+            series : [
+                {
+                    name : "预约人次",
+                    type : 'bar',
+                    //柱条的宽度
+                    barWidth:55,
+                    //使用的 y 轴的 index
+                    yAxisIndex:'0',
+                    //图形样式
+                    itemStyle : {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:"rgb(154, 188, 195)",
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+
+                        },
+                        normal : {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color:"#1790cf"
+                        },
+
+                    },
+                    data : series
+                },
+                {
+                    name : "应诊人次",
+                    type : 'bar',
+                    //柱条的宽度
+                    barWidth:55,
+                    //使用的 y 轴的 index
+                    yAxisIndex:'0',
+                    //图形样式
+                    itemStyle : {
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:"rgb(168, 227, 215)",
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+
+                        },
+                        normal : {
+                            // barBorderRadius:[5, 5, 5, 5],
+                            color:"#99d2dd"
+                        }
+                    },
+                    data : series2
+                },
+                {
+                    name : "应诊率",
+                    type : 'line',
+                    //标记的图形。default: 'emptyCircle',
+                    //包括 'circle', 'rect', 'roundRect', 'triangle', 'diamond', 'pin', 'arrow'
+                    symbol:'circle',//拐点样式
+                    //标记大小
+                    symbolSize:5,//拐点大小
+                    //是否平滑曲线显示。default: false
+                    smooth: true,
+                    //使用的 y 轴的 index
+                    yAxisIndex:'1',
+                    //折线拐点标志的样式。
+                    itemStyle: {
+                        normal: {
+                            color:"#33CC66",//曲线颜色
+                        },
+                        //图形的高亮样式。
+                        emphasis: {
+                            color:"rgb(100, 133, 155)",
+                            label : {
+                                show: true
+                            }
+                        }
+                    },
+                    data : series3
+                }
+
+
+            ]
+        };
+    }
+
+    //C1-5 堆叠条形码
+    window.onload=initBarCharts5();
+    function initBarCharts5(){
+        var outletUrl =  "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/test_xjy/MJZSR.cda&dataAccessId=bar_ds30";
+     //   outletUrl += "&paramtimestart=" + timestart +"&paramtimeend=" + timeend ;
+        outletUrl += "&paramtimestart=" + "20180626" +"&paramtimeend=" + "20180626" ;
+        //+"&paramgetks=" + getks;
+
+        // var outletJSON = readJSONFile(outletUrl).resultset;
+        // var data =BarDataEncapsulation2(outletJSON);
+        var data = getData2();
+        chartDrew(GetOutletOption2(data.xAxis,data.series,data.series2),  // option
+            echarts.init(document.getElementById("C1-5")) //chart
+        );
+    }
+    // 封装数据
+    function BarDataEncapsulation2 (cdaData){
+        // 柱状图的X轴属性
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr[i] = cdaData[i][0];
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴1的值（欠费）
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    //   cdaData[i][1]=cdaData[i][1].substring(0,cdaData[i][1].lastIndexOf('%'));
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        'value'  : cdaData[i][1],
+                        selected : true
+                    });
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴2的值（未欠费）
+        var series2=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        'value'  : cdaData[i][2],
+                        selected : true
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            xAxis : xAxis,
+            series : series,
+            series2 : series2
+        };
+    };
+    // option
+    function GetOutletOption2 (XLegends,XDatas1,XDatas2){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'axis',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter: function(params) {
+                    return params[0].name + '<br/>'
+                        + params[1].seriesName + ' : ' + params[1].value + '<br/>'
+                        + params[0].seriesName + ' : ' + params[0].value ;
+                }
+            },
+            //图例组件。
+            legend: {
+                data:['2016', '2017']
+            },
+            yAxis : [
+                {
+                    name : "类型",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    show : true,
+                    //data : SecondBarDataEncapsulation.getLegends(),
+                    data : XLegends,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval : 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 30,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                            fontSize : 10
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+
+                        lineStyle:{
+                            color:"#777"
+                        },
+                        color : "#007AC7"
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系内绘图网格
+            grid:{
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '8%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    name : "金额",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter: '{value}',
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval : 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 30,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        interval : 0,
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false
+                    }
+                }
+            ],
+            //系列列表。
+            series : [
+                {
+                    name : "2016",
+                    type : 'bar',
+                    //数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+                    stack: '总量',
+                    //图形样式
+                    itemStyle : {
+                        normal : {
+                            // color : "rgba(182, 162, 222)",
+                            color:"#1790cf",//曲线颜色
+                            label : {
+                                show : true,
+                                position : 'insideTop',
+                                textStyle: {
+                                    color:"white"
+                                }
+                            },
+                            //圆角半径
+                            barBorderRadius:0,
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:"#99CCFF",//曲线颜色
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        },
+
+                    },
+                    data : XDatas2
+                },
+                {
+                    name : "2017",
+                    type : 'bar',
+                    //数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+                    stack: '总量',
+                    //图形样式
+                    itemStyle : {
+                        normal : {
+                            color : "#99d2dd",
+                            label : {
+                                show : true,
+                                position : 'insideTop',
+                                textStyle: {
+                                    color:"black"
+                                }
+                            },
+                            //圆角半径
+                            barBorderRadius:0,
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:'rgba(159, 135, 208, 0.57)',
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        }
+                    },
+                    data : XDatas1
+                }
+            ]
+        };
+    };
+
+    //C1-6 堆叠柱形图
+    window.onload=initBarCharts6();
+    function initBarCharts6(){
+        var outletUrl =  "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/ZYQFZE.cda&dataAccessId=zyqfmx_qfrc_bar_ds";
+        // outletUrl += "&paramtimestart=" + timestart +"&paramtimeend=" + timeend  +"&paramgetks=" + getks;
+
+        // var outletJSON = readJSONFile(outletUrl).resultset;
+        // var data = BarDataEncapsulation(outletJSON);
+        var data = getData2();
+        chartDrew(GetOutletOption(data.xAxis,data.series,data.series2),  // option
+            echarts.init(document.getElementById("C1-6")) //chart
+        );
+    }
+    // 封装数据
+    function BarDataEncapsulation (cdaData){
+        // 柱状图的X轴属性
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr[i] = cdaData[i][0];
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴1的值（欠费）
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    //   cdaData[i][1]=cdaData[i][1].substring(0,cdaData[i][1].lastIndexOf('%'));
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        'value'  : cdaData[i][1],
+                        selected : true
+                    });
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴2的值（未欠费）
+        var series2=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    //     cdaData[i][2]=cdaData[i][2].substring(0,cdaData[i][2].lastIndexOf('%'));
+                    //alert(cdaData[i][2]);
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        'value'  : cdaData[i][2],
+                        selected : true
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            xAxis : xAxis,
+            series : series,
+            series2 : series2
+        };
+    };
+    // option
+    function GetOutletOption (XLegends,XDatas1,XDatas2){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'axis',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter: function(params) {
+                    return params[0].name + '<br/>'
+                        + params[1].seriesName + ' : ' + params[1].value + '%<br/>'
+                        + params[0].seriesName + ' : ' + params[0].value + '%';
+                }
+            },
+            //图例组件。
+            legend: {
+                data:['欠费占比', '未欠费占比']
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    name : "科室病区",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    show : true,
+                    data : XLegends,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval : 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 25,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                            fontSize : 10
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系内绘图网格
+            grid:{
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '8.5%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+
+            },
+            yAxis : [
+                {
+                    name : "金额占比",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter: '{value}%',
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false
+                    }
+                }
+            ],
+            series : [
+                {
+                    name : "未欠费占比",
+                    type : 'bar',
+                    //数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+                    stack: '总量',
+                    //柱条的宽度
+                    barWidth:60,
+                    itemStyle : {
+                        normal : {
+                            color:"#1790cf",//曲线颜色
+                            label : {
+                                show : true,
+                                position : 'insideTop',
+                                textStyle: {
+                                    color:"white"
+                                }
+                            },
+                            barBorderRadius:0,
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:"#1790cf",//曲线颜色
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        },
+
+                    },
+                    data : XDatas2
+                },
+                {
+                    name : "欠费占比",
+                    type : 'bar',
+                    //数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+                    stack: '总量',
+                    //柱条的宽度
+                    barWith:60,
+                    itemStyle : {
+                        normal : {
+                            color:'#99d2dd',
+                            label : {
+                                show : true,
+                                position : 'top',
+                                textStyle: {
+                                    color:"black"
+                                }
+                            },
+                            //圆角半径
+                            barBorderRadius:0,
+                        },
+                        //高亮的图形样式和标签样式。
+                        emphasis: {
+                            color:'#99d2dd',
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        }
+                    },
+                    data : XDatas1
+                }
+            ]
+        };
+    };
+
+    <!-- 柱状 end-->
+
+    <!-- 折线图 start-->
+    //C2-1 基础折线图
+    window.onload=initLineCharts1();
+    function initLineCharts1(){
+        //echarts2
+        var jzscTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/CHJB.cda&dataAccessId=cwsyl_line";
+        // var jzscTypeJSON = readJSONFile(jzscTypeUrl).resultset;
+        // var data = LineDataEncapsulation(jzscTypeJSON);
+        var data = getData1();
+        chartDrew(GetzyLineTypeOption(data.xAxis,data.series),  // option
+            echarts.init(document.getElementById("C2-1")) //chart
+        )
+    }
+    // 封装数据
+    function LineDataEncapsulation (cdaData){
+        // line的X轴属性
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr.push({
+                        'name' : cdaData[i][1],
+                        selected : true
+                    });
+                    tempArr[i] = cdaData[i][1];
+                }
+                return tempArr;
+            })();
+        //line的X轴的值
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    // cdaData[i][2]=cdaData[i][2].substring(0,cdaData[i][2].lastIndexOf('%'));
+                    tempArr.push({
+                        'name' : cdaData[i][1],
+                        'value'  : cdaData[i][2],
+                        selected : true
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            xAxis : xAxis,
+            series : series
+        };
+    };
+    // option
+    function GetzyLineTypeOption (XLegends,XDatas){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger : 'item',
+                //提示框浮层的背景颜色。
+                backgroundColor:'#fff',
+                //提示框浮层的边框颜色。
+                borderColor:'grey',
+                //提示框浮层的文本样式。
+                textStyle:{
+                    color:'grey'
+                },
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter: function(params) {
+                    var res = "日期：" + params.name + '<br/>' + "门诊量：" + params.value+'%';
+                    return res;
+                }
+            },
+            calculable : true,
+            //直角坐标系内绘图网格
+            grid:{
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '4%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '8%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+
+            },
+            //图例组件。
+            legend:{
+                data:['近30天门诊量']
+
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    name : "日期",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    show : true,
+                    //data : SecondBarDataEncapsulation.getLegends(),
+                    data : XLegends,
+                    //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样。
+                    boundaryGap : false,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval : 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 0,
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        show:false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    }
+                }
+            ],
+
+            yAxis : [
+                {
+                    name : "门诊量",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    show : true,
+                    //数据展示的小数精度。
+                    precision: 2,
+                    //是否是脱离 0 值比例。设置成 true 后坐标刻度不会强制包含零刻度。 default: false
+                    scale : true,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter : function(value){
+                            if(value !== 0){
+                                return value+'%';
+                            }else if(value === ""){
+                                return 0;
+                            }else{
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        show:false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    }
+                }
+            ],
+            series : [
+                {
+                    name : "近30天门诊量",
+                    type : 'line',
+                    //是否平滑曲线显示。default: false
+                    smooth: true,
+                    data : XDatas,
+                    //折线拐点标志的样式。
+                    itemStyle: {
+                        normal: {
+                            color:"#99CCFF",
+                        },
+                        //图形的高亮样式。
+                        emphasis: {
+                            color:"rgb(145,222,223)",
+                            label : {
+                                show: true
+                            }
+                        }
+                    },
+
+                }
+            ]
+        };
+    };
+
+    //C2-2 折线图堆叠 - 单轴
+    window.onload=initLineCharts2();//加载图表
+    function initLineCharts2(){
+        //echarts1
+        var srtblineTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/YLZSR_1.cda&dataAccessId=C1";
+        // srtblineTypeUrl += "&paramtimestart=" + timestart +"&paramtimeend=" + timeend + "&paramgetks=" + getks;
+
+        // var srtblineTypeJSON = readJSONFile(srtblineTypeUrl).resultset;
+        // var data = srtbLineDataEncapsulation(srtblineTypeJSON);
+        var data = getData2();
+        chartDrew(GetSrtbDoubleLineTypeOption(data.xAxis,data.series,data.series2),  // option
+            echarts.init(document.getElementById("C2-2")) //chart
+        );
+    }
+    //封装数据
+    function srtbLineDataEncapsulation(cdaData){
+        //获取的X轴1属性
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    if(cdaData[i][0]=="2017"){
+                        tempArr[i] = cdaData[i][1];
+                    }
+                }
+                return tempArr;
+            })();
+        //X轴1的值
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    if(cdaData[i][0]=="2017"){
+                        tempArr.push({
+                            'name' : cdaData[i][1],
+                            'value'  : cdaData[i][2],
+                            selected : true
+                        });
+                    }
+                }
+                return tempArr;
+            })();
+        //X轴2的值
+        var series2=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    if(cdaData[i][0]=="2018"){
+                        tempArr.push({
+                            'name' : cdaData[i][1],
+                            'value'  : cdaData[i][2],
+                            selected : true
+                        });
+                    }
+                }
+                //alert(tempArr);
+                return tempArr;
+            })();
+        return {
+            xAxis : xAxis,
+            series : series,
+            series2 : series2
+        };
+    };
+    //option
+    function GetSrtbDoubleLineTypeOption(XLegends1,XDatas1,XDatas2){
+        return {
+            //提示框组件
+            tooltip: {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'axis',
+                //提示框浮层的背景颜色。
+                backgroundColor:'#fff',
+                //提示框浮层的边框颜色。
+                borderColor:'grey',
+                //提示框浮层的文本样式。
+                textStyle:{
+                    color:'grey'
+                }
+            },
+            //图例组件。
+            legend: {
+                data:['2017','2018'],
+
+            },
+            //直角坐标系内绘图网格
+            grid:{
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '1.5%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样。
+                    boundaryGap : false,
+                    //坐标轴刻度相关设置。
+                    axisTick: {
+                        alignWithLabel: true
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval:0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate:0,
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    },
+                    data : XLegends1
+                }
+            ],
+            yAxis : [
+                {
+                    name : "收入",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        interval : 0,
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    }
+                }
+            ],
+            //图例列表
+            series : [
+                {
+                    name : "2017",
+                    type : 'line',
+                    //是否平滑曲线显示。default: false
+                    smooth: true,
+                    //折线拐点标志的样式。
+                    itemStyle: {
+                        normal: {
+                            color:"#FF6633"
+                        },
+                        //图形的高亮样式。
+                        emphasis: {
+                            color:"rgb(170,195,239,0.8)",
+                            label : {
+                                show: true
+                            }
+                        }
+                    },
+                    data : XDatas1
+                },
+                {
+                    name : "2018",
+                    type : 'line',
+                    //是否平滑曲线显示。default: false
+                    smooth: true,
+                    //折线拐点标志的样式。
+                    itemStyle: {
+                        normal: {
+                            color:"#1885bd",//曲线颜色
+                        },
+                        //图形的高亮样式。
+                        emphasis: {
+                            color:"rgb(231,184,187,0.8)",
+                            label : {
+                                show: true
+                            }
+                        }
+                    },
+                    data : XDatas2
+                }
+            ]
+        };
+    };
+
+    //C2-3 折线图堆叠 - 双轴
+    window.onload=initLineCharts3();//加载图表
+    function initLineCharts3(){
+        var lineTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/YLZSR_1.cda&dataAccessId=C2";
+        var lineTypeUrl1 = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/YLZSR_1.cda&dataAccessId=C21";
+
+        // var lineTypeJSON = readJSONFile(lineTypeUrl).resultset;//收入
+        // var lineTypeJSON1 = readJSONFile(lineTypeUrl1).resultset;//人次
+
+        // var data = DoubleLineDataEncapsulation(lineTypeJSON,lineTypeJSON1);
+        var data = getData2();
+        chartDrew(GetDoubleLineTypeOption(data.xAxis,data.series,data.series2),  // option
+            echarts.init(document.getElementById("C2-3")) //chart
+        )
+    }
+    //封装数据
+    function DoubleLineDataEncapsulation (cdaData1,cdaData2){
+        // line的X轴属性
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData2.length; i++){
+                    if(cdaData2[i][0]=="2018"){
+                        tempArr[i] = cdaData2[i][1];
+                    }
+                }
+                return tempArr;
+            })();
+        //line的X轴1的值
+        var series=
+            (function(){
+                var tempArr1 = [];
+                for(var i = 0; i < cdaData1.length; i++){
+                    if(cdaData1[i][0]=="2018"){
+                        tempArr1.push({
+                            'name' : cdaData1[i][1],
+                            'value'  : cdaData1[i][2],
+                            selected : true
+                        });
+                    }
+                }
+                return tempArr1;
+            })();
+        //line的X轴2的值
+        var series2=
+            (function(){
+                var tempArr2 = [];
+                for(var i = 0; i < cdaData2.length; i++){
+                    tempArr2.push({
+                        'name' : cdaData2[i][1],
+                        'value'  : cdaData2[i][2],
+                        selected : true
+                    });
+                }
+                return tempArr2;
+            })();
+        return {
+            xAxis : xAxis,
+            series : series,
+            series2 : series2
+        };
+    };
+    //option
+    function GetDoubleLineTypeOption(XLegends,XDatas1,XDatas2){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'axis',
+                //提示框浮层的背景颜色。
+                backgroundColor:'#fff',
+                //提示框浮层的边框颜色。
+                borderColor:'grey',
+                //提示框浮层的文本样式。
+                textStyle:{
+                    color:'grey'
+                }
+            },
+            //图例组件。
+            legend:{
+                data:['人次','收入'],
+
+            },
+            //直角坐标系内绘图网格
+            grid:{
+                //grid 组件离容器左侧的距离。default: '10%'
+                left: '1.5%',
+                //grid 组件离容器右侧的距离。default: '10%'
+                right: '1.5%',
+                //grid 组件离容器下侧的距离。default: 60
+                bottom: '10%',
+                //grid 组件离容器上侧的距离。default: 60
+                top:'20%',
+                //grid 区域是否包含坐标轴的刻度标签。default: false
+                containLabel: true
+
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    show : true,
+                    //坐标轴两边留白策略，类目轴和非类目轴的设置和表现不一样。
+                    boundaryGap : false,
+                    data : XLegends,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval:0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate:0,
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        show:false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    }
+                }
+            ],
+            yAxis : [
+                {
+                    name : "人次",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //数据展示的小数精度。
+                    precision: 2,
+                    //是否是脱离 0 值比例。设置成 true 后坐标刻度不会强制包含零刻度。 default: false
+                    scale : true,
+                    //y 轴的位置。
+                    position: 'left',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter : function(value){
+                            if(value !== 0){
+                                return value;
+                            }else if(value === ""){
+                                return 0;
+                            }else{
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        show:false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    }
+                },
+                {
+                    name : "收入",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //数据展示的小数精度。
+                    precision: 2,
+                    scale : true,
+                    //y 轴的位置。
+                    position:'right',
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //刻度标签的内容格式器，支持字符串模板和回调函数两种形式。default: null
+                        formatter : function(value){
+                            if(value !== 0){
+                                return value;
+                            }else if(value === ""){
+                                return 0;
+                            }else{
+                                return 0;
+                            }
+                        },
+                        //刻度标签与轴线之间的距离。
+                        margin:10,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴轴线相关设置。
+                    axisLine : {
+                        show : true,
+                        lineStyle:{
+                            color:"#777"
+                        }
+                    },
+                    //坐标轴刻度相关设置。
+                    axisTick:{
+                        show:false
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false,
+                        lineStyle: {
+                            // 使用深浅的间隔色
+                            color: '#eee'
+                        }
+                    }
+                }
+            ],
+            series : [
+                {
+                    name : "收入",
+                    type : 'line',
+                    //是否平滑曲线显示。default: false
+                    smooth: true,
+                    //使用的 y 轴的 index
+                    yAxisIndex: 1,
+                    //折线拐点标志的样式。
+                    itemStyle: {
+                        normal: {
+                            color:"#99ccff ",
+                        },
+                        //图形的高亮样式。
+                        emphasis: {
+                            color:"rgb(214,204,234,0.9)",
+                            label : {
+                                show: true,
+                            }
+                        }
+                    },
+                    data : XDatas1
+                },
+                {
+                    name : "人次",
+                    type : 'line',
+                    //是否平滑曲线显示。default: false
+                    smooth: true,
+                    //折线拐点标志的样式。
+                    itemStyle: {
+                        normal: {
+                            color:"#1885bd",
+                        },
+                        //图形的高亮样式。
+                        emphasis: {
+                            color:"#99CCFF",
+                            label : {
+                                show: true
+                            }
+                        }
+                    },
+                    data : XDatas2
+                }
+            ]
+        };
+    };
+
+    <!-- 折线图 end-->
+
+
+    <!-- 饼图 start-->
+    <!-- C3-1 饼图-->
+    window.onload=initPieCharts1();//加载图表
+    function initPieCharts1(){
+        var discountTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/MZB_1.cda&dataAccessId=pie_ds";
+        // discountTypeUrl += "&paramgetks=" + getks;
+        discountTypeUrl += "&paramgetks=" + "ALL";
+        // var discountTypeJSON = readJSONFile(discountTypeUrl).resultset;
+        // var data = PieDataEncapsulation(discountTypeJSON);
+        var data = getData1();
+        chartDrew(GetDiscountTypeOption( data.series,data.series),  // option
+            echarts.init(document.getElementById("C3-1")) //chart
+        )
+    }
+    // 封装数据
+    function PieDataEncapsulation (cdaData){
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        'value'  : cdaData[i][1],
+                        //  selected : true
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            series : series
+        };
+    };
+    // option
+    function GetDiscountTypeOption (PLegends,PSeries){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger : 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter: function(params) {
+                    var res = " 类别：" + params.name + '<br/>' + "人次：" + params.value;
+                    return res;
+                }
+            },
+            //图例组件。
+            legend : {
+                //图例列表的布局朝向。default: 'horizontal'，可选：'horizontal'、'vertical'
+                orient: 'vertical',
+                // 图例组件离容器左侧的距离。
+                left : 'left',
+                //图例组件离容器上侧的距离。
+                top:'middle',
+                data : PLegends
+            },
+            //调色盘颜色列表
+            color:['#5b9bd5',' #8bb1dd','#d9d9d9','#b0dcd5',
+                '#96cfac','#89a3c6','#bbcce9',
+                '#72cfd7',
+                '#4472c4',
+                '#255e91'],
+            //工具栏。
+            toolbox : {
+                show : true,
+                //工具栏 icon 的布局朝向。default: 'horizontal'，可选：'horizontal'、'vertical'
+                orient : 'vertical',
+                //各工具配置项。
+                feature : {
+                    mark : {
+                        show : true
+                    },
+                    //动态类型切换
+                    magicType : {
+                        //是否显示该工具。
+                        show : true,
+                        //启用的动态类型，包括'line'（切换为折线图）, 'bar'（切换为柱状图）, 'stack'（切换为堆叠模式）, 'tiled'（切换为平铺模式）,'funnel'(切换为漏斗图)。
+                        type : ['pie','funnel'],
+                        //各个类型的专有配置项
+                        option : {
+                            funnel : {
+                                x : '25%',
+                                width : '50%',
+                                //水平方向对齐布局类型
+                                funnelAlign : 'bottom',
+                                max : 1548
+                            }
+                        }
+                    }
+                }
+            },
+            //是否显示拖拽用的手柄
+            calculable : true,
+            //系列列表
+            series : [
+                {
+                    name : "人次",
+                    type :'pie',
+                    // 饼图的半径，数组的第一项是内半径，第二项是外半径。
+                    radius: ['40%', '70%'],
+                    //是否启用防止标签重叠策略。default: true
+                    avoidLabelOverlap: false,
+                    //饼图的中心（圆心）坐标，数组的第一项是横坐标，第二项是纵坐标。default: ['50%', '50%']
+                    center: ['50%', '50%'],
+                    data : PSeries,
+                    //图形样式。
+                    itemStyle : {
+                        normal : {
+                            //标签
+                            label : {
+                                position : 'inner',
+                                //标签内容格式器
+                                //{a}：系列名。{b}：数据名。{c}：数据值。{d}：百分比。{@xxx}：数据中名为'xxx'的维度的值，{@[n]}：数据中维度n的值，
+                                formatter: function (params){
+                                    return (params.percent - 0) + '%';
+                                },
+                                textStyle : {
+                                    color : '#000'
+                                },
+                            },
+                            //标签的视觉引导线样式
+                            labelLine : {
+                                show : true
+                            },
+                        },
+                        //高亮的扇区和标签样式。
+                        emphasis : {
+                            //饼图图形上的文本标签
+                            label : {
+                                show : true
+                            },
+                            //标签的视觉引导线样式
+                            labelLine : {
+                                show :true
+                            }
+                        }
+                    },
+                    //饼图图形上的文本标签
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'center'
+                        },
+                        //高亮的扇区和标签样式。
+                        emphasis: {
+                            show: true,
+                            textStyle: {
+                                fontSize: '20',
+                            }
+                        }
+                    }
+                }
+            ]
+        };
+    };
+
+    <!-- C3-2 饼图带图标-->
+    window.onload=initPieCharts2();//加载图表
+    function initPieCharts2(){
+
+        var discountTypeUrl ="https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/SSJSS_1_KS.cda&dataAccessId=C2_DS";
+        // discountTypeUrl += "&parambutton_event=" + button_event;
+        // alert(discountTypeUrl)
+        // var discountTypeJSON = readJSONFile(discountTypeUrl).resultset;
+        // var data = PieDataEncapsulation2(discountTypeJSON);
+        var data = getData1();
+        chartDrew(GetDiscountPieTypeOption( data.series,data.series),  // option
+            echarts.init(document.getElementById("C3-2")) //chart
+        )
+    }
+    // 封装数据
+    function PieDataEncapsulation2 (cdaData){
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        'value'  : cdaData[i][1],
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            series : series
+        };
+    };
+    // option
+    function GetDiscountPieTypeOption (PLegends,PSeries){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger : 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                //{a}, {b}，{c}，{d}，分别表示系列名，数据项名称，数据值，百分比}等
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            //图例组件。
+            legend : {
+                //图例列表的布局朝向。default: 'horizontal'，可选：'horizontal'、'vertical'
+                orient: 'vertical',
+                //图例组件离容器左侧的距离。
+                left : 'left',
+                //图例组件离容器上侧的距离。
+                top:'middle',
+                data : PLegends
+            },
+
+            color:['#1790cf', '#99d2dd','#bfbfbf'],
+            //系列列表
+            series : [
+                {
+                    name:'人次',
+                    type :'pie',
+                    // 饼图的半径，数组的第一项是内半径，第二项是外半径。
+                    radius: ['55%', '85%'],
+                    //是否启用防止标签重叠策略。default: true
+                    avoidLabelOverlap: false,
+                    //图形样式。
+                    itemStyle : {
+                        //高亮的扇区和标签样式。
+                        emphasis: {
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                            //阴影水平方向上的偏移距离。
+                            shadowOffsetX: 0,
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    data : PSeries,
+
+                }
+            ]
+        };
+    };
+
+    <!-- C3-3 饼图3-->
+    window.onload=initPieCharts4();
+    function initPieCharts4(){
+        var discountTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/ZYQFZE.cda&dataAccessId=zyqfmx_qfzb_pie_ds";
+        // discountTypeUrl  += "&paramtimestart=" + timestart +"&paramtimeend=" + timeend +"&paramgetks=" + getks;
+
+        // var discountTypeJSON = readJSONFile(discountTypeUrl).resultset;
+        // var data = PieDataEncapsulation3(discountTypeJSON);
+        var data = getData1();
+        chartDrew(GetDiscountTypeOption2( data.series,data.series),  // option
+            echarts.init(document.getElementById("C3-3")) //chart
+        )
+    }
+    // 封装数据
+    function PieDataEncapsulation3 (cdaData){
+        var series=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr.push({
+                        'name' : cdaData[i][0],
+                        'value'  : cdaData[i][1]
+                    });
+                }
+                return tempArr;
+            })();
+        return {
+            series : series
+        };
+    };
+    // option
+    function GetDiscountTypeOption2 (PLegends,PSeries){
+        return {
+            //标题组件
+            title: {
+                //主标题文本
+                text: '',
+                //grid 组件离容器左侧的距离
+                left: 'left',
+                //grid 组件离容器上侧的距离
+                top: 'top',
+                textStyle: {
+                    color: '#333',
+                    fontWeight: 'bolder',
+                    fontSize: 40,
+                }
+            },
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger : 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                //{a}, {b}，{c}，{d}，分别表示系列名，数据项名称，数据值，百分比}等
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            //图例组件。
+            legend : {
+                //图例列表的布局朝向。default: 'horizontal'，可选：'horizontal'、'vertical'
+                orient: 'vertical',
+                //图例组件离容器左侧的距离。
+                left : 'left',
+                //图例组件离容器上侧的距离。
+                top:'middle',
+                data : PLegends
+            },
+            // color:['#CCCCCC','#CCCC99','#CC99FF','#CCCCFF','#99CCFF','#9966FF','#9999FF','#99CC99','#FFCC99','#FFCCFF','#FFCC66','#FFCC00'],
+            color:['#1790cf ','#1bb2d8','#99d2dd','#88b0bb','#1c7099'],
+            //图例列表
+            series : [
+                {
+                    name:'金额',
+                    type :'pie',
+                    // 饼图的半径，数组的第一项是内半径，第二项是外半径。
+                    radius: ['50%', '80%'],
+                    //饼图的中心（圆心）坐标，数组的第一项是横坐标，第二项是纵坐标。default: ['50%', '50%']
+                    center:['52%','50%'],
+                    //是否启用防止标签重叠策略。default: true
+                    avoidLabelOverlap: false,
+                    //饼图图形上的文本标签
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'center'
+                        },
+                        //高亮的扇区和标签样式。
+                        emphasis: {
+                            show: true,
+                            textStyle: {
+                                fontSize: '14',
+                            }
+                        }
+                    },
+                    //标签的视觉引导线样式
+                    labelLine: {
+                        normal: {
+                            show: false
+                        }
+                    },
+                    data : PSeries,
+
+                }
+            ]
+        };
+    };
+
+    <!-- 饼图 end-->
+
+    <!-- Scatter start-->
+    //C4-1 Scatter
+    window.onload=initScatterCharts1();
+    function initScatterCharts1(){
+        var ksTypeUrl = "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/CHJB.cda&dataAccessId=ks1_ds";
+        var ksTypeJSON = readJSONFile(ksTypeUrl).resultset;
+        // console.log(ksTypeJSON);
+        var outletUrl =  "https://bi.ugsg.cn/pentaho/plugin/cda/api/doQuery?path=/public/TZ3.0/CHJB.cda&dataAccessId=chjb_ds";
+        // outletUrl += "&paramtimestart=" + timestart + "&paramgetsx=" + getsx;
+        outletUrl += "&paramtimestart=" + '20180601"' + "&paramgetsx=" + "ALL";
+
+        // var outletJSON = readJSONFile(outletUrl).resultset;
+
+        // var data1 = BarDataEncapsulation5(ksTypeJSON);
+        // var data2 = BarDataEncapsulation5(outletJSON);
+        var data = getData2();
+        chartDrew(GetOutletOption5(data1.xAxis, data2.series,data2.series2),  // option
+            echarts.init(document.getElementById("C4-1")) //chart
+        )
+
+    }
+    // 封装数据
+    function BarDataEncapsulation5(cdaData){
+        // 柱状图的X轴属性
+        var xAxis=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr[i] = cdaData[i][0];
+                }
+                return tempArr;
+            })();
+        //柱状图的X轴1的值（欠费）
+        var series=
+            (function(){
+                var tempArr=cdaData;
+                return tempArr;
+            })();
+        // 柱状图的X轴2的值（未欠费）
+        var series2=
+            (function(){
+                var tempArr = [];
+                for(var i = 0; i < cdaData.length; i++){
+                    tempArr[i] = cdaData[i];
+                }
+                return tempArr;
+            })();
+        return {
+            xAxis : xAxis,
+            series : series,
+            series2 :series2
+        };
+    };
+    // option
+    function GetOutletOption5 (XLegends,XDatas1,XDatas2){
+        return {
+            //提示框组件
+            tooltip : {
+                //触发类型。default: 'item',可选：item、axis、none
+                //item ：数据项图形触发，axis：坐标轴触发，none：什么都不触发。
+                trigger: 'item',
+                //提示框浮层内容格式器，支持字符串模板和回调函数两种形式。
+                formatter : function (params) {
+                    return params.value[0] + '<br/>'
+                        + params.value[2] +  ':<br/>'
+                        +'疾病：'+params.value[1] ;
+                },
+            },
+            //图例组件。
+            legend: {
+                data:['疾病']
+            },
+            //直角坐标系 grid 中的 x 轴
+            xAxis : [
+                {
+                    name : "科室",
+                    //坐标轴名称显示位置。default: 'end' 可选：start、middle或center、end
+                    nameLocation : "end",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    //value:数值轴,category:类目轴,time:时间轴,log:对数轴
+                    type : 'category',
+                    data : XLegends,
+                    //坐标轴刻度标签的相关设置。
+                    axisLabel : {
+                        //坐标轴刻度标签的显示间隔，在类目轴中有效。默认会采用标签不重叠的策略间隔显示标签。
+                        //可以设置成 0 强制显示所有标签。default: 'auto'
+                        interval : 0,
+                        //刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠。
+                        rotate: 30,
+                        //坐标轴刻度标签的文本样式。
+                        textStyle: {
+                            color:"#777",
+                            fontSize : 12
+                        }
+                    },
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false
+                    }
+                }
+            ],
+            //直角坐标系内绘图网格
+            grid : {    //控制图的大小
+                //grid 组件离容器左侧的距离。
+                left : 70,
+                //grid 组件离容器上侧的距离。
+                top : 70,
+                y2 : 70    //y2可以控制X轴跟Zoom控件之间的间隔，避免以为倾斜后造成label重叠到Zoom上
+            },
+            yAxis : [
+                {
+                    name : "数量",
+                    //坐标轴类型.default: 'category' 可选：value、category、time、log
+                    type : 'value',
+                    //坐标轴在 grid 区域中的分隔线。
+                    splitLine : {
+                        show: false
+                    }
+                }
+            ],
+            //图例列表
+            series : [
+                {
+                    name : "疾病",
+                    type : 'scatter',
+                    //图形样式。
+                    itemStyle : {
+                        normal : {
+                            // color:"rgba(98, 153, 204, 0.66)",
+                            color:"rgba(98, 204, 100, 0.51)",
+                            label : {
+                                show : false,
+                            },
+                            //圆角半径
+                            barBorderRadius:0,
+                        },
+                        //高亮的扇区和标签样式。
+                        emphasis: {
+                            color:"#99CCFF",//曲线颜色
+                            label : {
+                                show : true,
+                                textStyle: {
+                                    color:"#777"
+                                }
+                            },
+                            //阴影颜色
+                            shadowColor: 'rgba(0, 0, 0, 0.1)',
+                            //图形阴影的模糊大小
+                            shadowBlur: 10,
+                        },
+
+                    },
+                    //标记的大小
+                    symbolSize: 20,
+                    data : XDatas1
+                }
+            ]
+        };
+    };
+    <!-- Scatter end-->
+</script>
+</html>

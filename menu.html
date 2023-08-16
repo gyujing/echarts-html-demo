@@ -1,0 +1,151 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title></title>
+  <link rel="stylesheet" href="js/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/common_mdsd.css">
+  <link rel="stylesheet" href="css/font.css">
+  <script src="js/bootstrap-3.3.7-dist/js/jquery1.9.1.js"></script>
+  <script src="js/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+  <script src="js/index_tab_yl.js"></script>
+  <style>
+
+    #menu_first .child_div1:nth-child(1) div {
+      background: url(_images/icon/kszb.png) no-repeat center;
+      background-size: auto auto;
+      height: 37px;
+      background-size: contain;
+    }
+  </style>
+</head>
+
+<body id="contain" class="container-fluid bodyStyle">
+<!-- 头 开始 -->
+<div class="row head clearfix">
+  <div class="col-xs-5 col-sm-7 col-md-8 col-lg-9 logo logoDormitory" style="margin-top: 0">
+    <div style="float:left"></div>
+    <div style="float:left;width: 1px;height: 50%; margin-top:17px;background: #5b76d0"></div>
+    <div style="float: left;padding-left: 25px;height: 70px">
+      <span>公网</span>
+      <p>应用平台<i class="i">V2.0</i></p>
+    </div>
+  </div>
+  <div class="col-xs-6 col-sm-5 col-md-4 col-lg-3">
+    <div class="row">
+      <div class="col-xs-4 col-sm-4 col-md-5 col-lg-6">
+        <div class="row" >
+          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="padding-right: 0;padding-left: 0">
+            <span class="right_a"><i class="message">5</i></span>
+          </div>
+          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="padding-right: 0;padding-left: 0">
+            <span class="right_c fullBtn" onclick="fullScreen()"></span>
+            <span class="right_c exBtn" onclick="exitFullScreen()"></span>
+          </div>
+          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="padding-right: 0;padding-left: 0">
+            <span class="right_b" onclick="backToLogin()"></span>
+          </div>
+        </div>
+      </div>
+      <div class="col-xs-8 col-sm-8 col-md-7 col-lg-6">
+        <div class="row welcome clearfix">
+          <div class="col-xs-3 col-sm-3 col-md-3 col-lg-4"></div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-5 haName ">
+            <p>欢迎您登录</p><span>李文华</span>
+          </div>
+          <div class="col-xs-1 col-sm-1 col-md-1 col-lg-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- 头 结束 -->
+<!-- 身 开始 -->
+<div id="menu_first" class="row">
+    <div style="margin:auto;" class="row row1">
+    <div class="child_div">
+      <a>
+        <div style=""></div>
+        <p >PC</p>
+        <!--<p >全院运营、质量指标展示</p>-->
+      </a>
+    </div>
+    <div class="child_div">
+      <a>
+        <div style=""></div>
+        <p >移动</p>
+        <!--<p>全院运营、质量和临床数据分析</p>-->
+      </a>
+    </div>
+    <div class="child_div maR0">
+      <a>
+        <div style=""></div>
+        <p >数据大屏</p>
+        <!--<p >患者信息总览、风险及危机管理</p>-->
+      </a>
+    </div>
+  </div>
+    <div style="margin:auto;" class="row row4">
+    <div class="child_div1">
+      <a  href="index_tab.html">
+        <div style=""></div>
+        <span>echarts demo</span>
+      </a>
+    </div>
+  </div>
+</div>
+<!-- 身 结束 -->
+</body>
+  <script>
+    $(function () {
+        var width=$('#contain').width();
+        var width1=0.70*width;
+        var width2=0.30*width;
+        var height=$('#contain').height();
+        var height1=0.85*height;
+        var height2=0.15*height-70;
+        $('#menu_first').css({
+            'width':width1,
+            'padding-top':(height1-45)/3,
+            'height':height1
+        });
+
+        $('.child_div').css({
+            'width':(width1-30)/3,
+            'height':(height1-45)/3
+        });
+        $('.child_div1').css({
+            'width':width1,
+            'height':(height1-45)/6,
+        });
+        $('.child_div div,.child_div1 div').css({
+            'height':(height1-45)/3*0.285
+        });
+        $(window).resize(function () {
+            var width=$('#contain').width();
+            var width1=0.70*width;
+            var width2=0.30*width;
+            var height=$('#contain').height();
+            var height1=0.85*height;
+            var height2=0.15*height-70;
+            $('#menu_first').css({
+                'width':width1,
+                'padding-top':(height1-45)/3
+            });
+            $('.child_div').css({
+                'width':(width1-30)/3,
+                'height':(height1-45)/3
+            });
+            $('.child_div1').css({
+                'width':width1,
+                'height':(height1-45)/6
+            });
+            $('.child_div div,.child_div1 div').css({
+                'height':(height1-45)/3*0.285
+            })
+        });
+    });
+
+  </script>
+</html>
